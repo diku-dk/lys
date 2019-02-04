@@ -1,3 +1,9 @@
+-- | ignore
+
+-- This file exists as a wrapper that defines entry points in the
+-- specific form that liblys.c requires.  It is copied into place and
+-- modified by the rules in common.mk.
+
 module m = import "lys"
 
 type state = m.lys.state
