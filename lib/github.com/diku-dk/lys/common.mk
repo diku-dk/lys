@@ -9,7 +9,7 @@ else
 LDFLAGS?=-lOpenCL -lm -lsdl2
 endif
 
-$(PROGNAME): $(PROGNAME).o lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/liblys.h
+$(PROGNAME): $(PROGNAME).o lib/github.com/diku-dk/lys/liblys.c
 	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME).h"' $(PROGNAME).o -o lys $(LDFLAGS)
 
 %.c: %.fut
