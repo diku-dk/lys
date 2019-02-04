@@ -17,4 +17,4 @@ run: lys
 	./lys
 
 clean:
-	rm lys test.c test.h *.o
+	rm -f lys test.c test.h *.o
