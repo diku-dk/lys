@@ -1,0 +1,4 @@
+*.o
+test.h
+test.c
+lys
