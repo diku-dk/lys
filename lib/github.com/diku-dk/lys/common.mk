@@ -4,7 +4,7 @@ all: $(PROGNAME)
 
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
-LDFLAGS?=-framework OpenCL -lm -lsdl2
+LDFLAGS?=-framework OpenCL -lm -lSDL2
 else
 LDFLAGS?=-lOpenCL -lm -lSDL2
 endif
