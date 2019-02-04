@@ -14,6 +14,13 @@ entry init (h: i32) (w: i32): state = {time = 0, w, h, center=(h/2,w/2)}
 entry resize (h: i32) (w: i32) (s: state): state =
   s with h = h with w = w with center = (h/2,w/2)
 
+entry keypress (key: i32) (s: state): state =
+  if key == SDLK_RIGHT then s with center.2 = s.center.2 + 1
+  else if key == SDLK_LEFT then s with center.2 = s.center.2 - 1
+  else if key == SDLK_UP then s with center.1 = s.center.1 - 1
+  else if key == SDLK_DOWN then s with center.1 = s.center.1 + 1
+  else s
+
 entry step td (s: state): state =
   s with time = td + s.time
 

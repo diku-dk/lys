@@ -109,21 +109,15 @@ void handle_sdl_events(struct lys_context *ctx)
     case SDL_KEYDOWN:
       switch (event.key.keysym.sym) {
       case SDLK_ESCAPE:
-      case SDLK_q:
         ctx->running = 0;
         break;
-      case SDLK_UP:
-        ctx->vy--;
-        break;
-      case SDLK_DOWN:
-        ctx->vy++;
-        break;
-      case SDLK_LEFT:
-        ctx->vx--;
-        break;
-      case SDLK_RIGHT:
-        ctx->vx++;
-        break;
+      default:
+        {
+          struct futhark_opaque_state *new_state;
+          FUT_CHECK(ctx->fut, futhark_entry_keypress(ctx->fut, &new_state, (event.key.keysym.sym), ctx->state));
+          futhark_free_opaque_state(ctx->fut, ctx->state);
+          ctx->state = new_state;
+        }
       }
     }
   }
