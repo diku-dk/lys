@@ -6,7 +6,7 @@ OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
 LDFLAGS?=-framework OpenCL -lm -lsdl2
 else
-LDFLAGS?=-lOpenCL -lm -lsdl2
+LDFLAGS?=-lOpenCL -lm -lSDL2
 endif
 
 $(PROGNAME): $(PROGNAME).o lib/github.com/diku-dk/lys/liblys.c
