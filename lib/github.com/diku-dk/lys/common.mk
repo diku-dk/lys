@@ -9,14 +9,17 @@ else
 LDFLAGS?=-lOpenCL -lm -lSDL2
 endif
 
-$(PROGNAME): $(PROGNAME).o lib/github.com/diku-dk/lys/liblys.c
-	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME).h"' $(PROGNAME).o -o lys $(LDFLAGS)
+$(PROGNAME): $(PROGNAME)_wrapper.o lib/github.com/diku-dk/lys/liblys.c
+	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME)_wrapper.h"' $(PROGNAME)_wrapper.o -o lys $(LDFLAGS)
 
 lib: futhark.pkg
 	futhark pkg sync
 
 %.c: %.fut lib
 	futhark opencl --library $<
+
+%_wrapper.fut: lib/github.com/diku-dk/lys/genlys.fut $(PROGNAME).fut
+	cat $< | sed 's/"lys"/"$(PROGNAME)"/' > $@
 
 run: lys
 	./lys

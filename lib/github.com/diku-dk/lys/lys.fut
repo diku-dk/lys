@@ -3,23 +3,42 @@
 -- | For convenience, re-export the colour module.
 open import "../../athas/matte/colour"
 
--- | Initial state for a given window size.
-type entry_init 'state = (h: i32) -> (w: i32) -> state
+module type lys = {
+  type state
 
--- | Time-stepping the state.
-type entry_step 'state = (time_delta: f32) -> state -> state
+  -- | Initial state for a given window size.
+  val init : (h: i32) -> (w: i32) -> state
 
--- | The window was resized.
-type entry_resize 'state = (h: i32) -> (w: i32) -> state -> state
+  -- | Time-stepping the state.
+  val step : (time_delta: f32) -> state -> state
 
--- | Someone pressed a key!
-type entry_keypress 'state = i32 -> state -> state
+  -- | The window was resized.
+  val resize : (h: i32) -> (w: i32) -> state -> state
 
--- | The function for rendering a screen image in row-major order
--- (height by width).  The size of the array returned must match the
--- last dimensions provided to the state (via `entry_init`@term or
--- `entry_resize`@term).
-type entry_render 'state = state -> [][]argb.colour
+  -- | Someone pressed a key!
+  val keypress : i32 -> state -> state
+
+  -- | The function for rendering a screen image in row-major order
+  -- (height by width).  The size of the array returned must match the
+  -- last dimensions provided to the state (via `init`@term or
+  -- `resize`@term).
+  val render : state -> [][]argb.colour
+}
+
+-- | A dummy lys module that just produces a black rectangle and does
+-- nothing in response to events.
+module lys: lys = {
+  type state = {h: i32, w: i32}
+  let init h w: state = {h,w}
+  let step _ s: state = s
+  let resize h w _: state = {h,w}
+  let keypress _ s: state = s
+  let render {h,w} = replicate w argb.black |> replicate h
+}
+
+module mk_lys (m: lys): lys = {
+    open m
+}
 
 type keycode = i32
 
