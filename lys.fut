@@ -12,7 +12,7 @@ type state = {time: f32, h: i32, w: i32, center: (i32, i32)}
 entry init (h: i32) (w: i32): state = {time = 0, w, h, center=(h/2,w/2)}
 
 entry resize (h: i32) (w: i32) (s: state): state =
-  s with h = h with w = w with center = (h/2,w/2)
+  s with h = h with w = w
 
 entry keypress (key: i32) (s: state): state =
   if key == SDLK_RIGHT then s with center.2 = s.center.2 + 1
