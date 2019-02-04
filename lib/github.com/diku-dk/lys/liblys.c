@@ -64,6 +64,11 @@ void window_size_updated(struct lys_context *ctx, int newx, int newy)
   ctx->width = newx;
   ctx->height = newy;
 
+  struct futhark_opaque_state *new_state;
+  FUT_CHECK(ctx->fut, futhark_entry_resize(ctx->fut, &new_state, ctx->height, ctx->width, ctx->state));
+  futhark_free_opaque_state(ctx->fut, ctx->state);
+  ctx->state = new_state;
+
   ctx->wnd_surface = SDL_GetWindowSurface(ctx->wnd);
   SDL_ASSERT(ctx->wnd_surface != NULL);
 
@@ -137,7 +142,7 @@ void sdl_loop(struct lys_context *ctx)
     futhark_free_opaque_state(ctx->fut, ctx->state);
     ctx->state = new_state;
 
-    FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state, ctx->height, ctx->width));
+    FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state));
     FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, out_arr, ctx->data));
     FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, out_arr));
 
@@ -157,7 +162,7 @@ void do_sdl(struct futhark_context *fut)
 
   ctx.last_time = get_wall_time();
   ctx.fut = fut;
-  futhark_entry_init(fut, &ctx.state);
+  futhark_entry_init(fut, &ctx.state, INITIAL_HEIGHT, INITIAL_WIDTH);
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
 
