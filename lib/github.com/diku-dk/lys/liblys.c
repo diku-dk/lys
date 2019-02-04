@@ -24,18 +24,18 @@ static inline void _sdl_assert(int res, const char *file, int line)
 {
   if (res == 0) {
     fprintf(stderr, "%s:%d: SDL error %d: %s\n",
-        file, line, res, SDL_GetError());
+            file, line, res, SDL_GetError());
     exit(EXIT_FAILURE);
   }
 }
 
 #define FUT_CHECK(ctx, x) _fut_check(ctx, x, __FILE__, __LINE__)
 static inline void _fut_check(struct futhark_context *ctx, int res,
-    const char *file, int line)
+                              const char *file, int line)
 {
   if (res != 0) {
     fprintf(stderr, "%s:%d: Futhark error %d: %s\n",
-        file, line, res, futhark_context_get_error(ctx));
+            file, line, res, futhark_context_get_error(ctx));
     exit(EXIT_FAILURE);
   }
 }
@@ -55,7 +55,7 @@ struct lys_context {
 };
 
 void window_size_updated(struct lys_context *ctx, struct futhark_context *fut,
-    int newx, int newy)
+                         int newx, int newy)
 {
   // https://stackoverflow.com/a/40122002
   ctx->wnd_surface = SDL_GetWindowSurface(ctx->wnd);
@@ -77,7 +77,7 @@ void window_size_updated(struct lys_context *ctx, struct futhark_context *fut,
     SDL_FreeSurface(ctx->surface);
   }
   ctx->surface = SDL_CreateRGBSurfaceFrom(ctx->data, ctx->width, ctx->height,
-      32, ctx->width * sizeof(uint32_t), 0xFF0000, 0xFF00, 0xFF, 0x00000000);
+                                          32, ctx->width * sizeof(uint32_t), 0xFF0000, 0xFF00, 0xFF, 0x00000000);
   SDL_ASSERT(ctx->surface != NULL);
 }
 
@@ -87,39 +87,39 @@ void handle_sdl_events(struct lys_context *ctx, struct futhark_context *fut)
 
   while (SDL_PollEvent(&event) == 1) {
     switch (event.type) {
-      case SDL_WINDOWEVENT:
-        switch (event.window.event) {
-          case SDL_WINDOWEVENT_RESIZED:
-            {
-              int newx = (int)event.window.data1;
-              int newy = (int)event.window.data2;
-              window_size_updated(ctx, fut, newx, newy);
-              break;
-            }
+    case SDL_WINDOWEVENT:
+      switch (event.window.event) {
+      case SDL_WINDOWEVENT_RESIZED:
+        {
+          int newx = (int)event.window.data1;
+          int newy = (int)event.window.data2;
+          window_size_updated(ctx, fut, newx, newy);
+          break;
         }
-        break;
-      case SDL_QUIT:
+      }
+      break;
+    case SDL_QUIT:
+      ctx->running = 0;
+      break;
+    case SDL_KEYDOWN:
+      switch (event.key.keysym.sym) {
+      case SDLK_ESCAPE:
+      case SDLK_q:
         ctx->running = 0;
         break;
-      case SDL_KEYDOWN:
-        switch (event.key.keysym.sym) {
-          case SDLK_ESCAPE:
-          case SDLK_q:
-            ctx->running = 0;
-            break;
-          case SDLK_UP:
-            ctx->vy--;
-            break;
-          case SDLK_DOWN:
-            ctx->vy++;
-            break;
-          case SDLK_LEFT:
-            ctx->vx--;
-            break;
-          case SDLK_RIGHT:
-            ctx->vx++;
-            break;
-        }
+      case SDLK_UP:
+        ctx->vy--;
+        break;
+      case SDLK_DOWN:
+        ctx->vy++;
+        break;
+      case SDLK_LEFT:
+        ctx->vx--;
+        break;
+      case SDLK_RIGHT:
+        ctx->vx++;
+        break;
+      }
     }
   }
 }
@@ -153,9 +153,10 @@ void do_sdl(struct futhark_context *fut)
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
 
-  ctx.wnd = SDL_CreateWindow("Lys",
-      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-      INITIAL_WIDTH, INITIAL_HEIGHT, SDL_WINDOW_RESIZABLE);
+  ctx.wnd =
+    SDL_CreateWindow("Lys",
+                     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                     INITIAL_WIDTH, INITIAL_HEIGHT, SDL_WINDOW_RESIZABLE);
   SDL_ASSERT(ctx.wnd != NULL);
 
   window_size_updated(&ctx, fut, INITIAL_WIDTH, INITIAL_HEIGHT);
