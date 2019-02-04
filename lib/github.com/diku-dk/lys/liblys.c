@@ -42,20 +42,20 @@ static inline void _fut_check(struct futhark_context *ctx, int res,
 
 struct lys_context {
   struct futhark_context *fut;
+  struct futhark_opaque_state *state;
   SDL_Window *wnd;
   SDL_Surface *wnd_surface;
   SDL_Surface *surface;
   int width;
   int height;
   int32_t *data;
-  int64_t start_time;
+  int64_t last_time;
   int vx;
   int vy;
   int running;
 };
 
-void window_size_updated(struct lys_context *ctx, struct futhark_context *fut,
-                         int newx, int newy)
+void window_size_updated(struct lys_context *ctx, int newx, int newy)
 {
   // https://stackoverflow.com/a/40122002
   ctx->wnd_surface = SDL_GetWindowSurface(ctx->wnd);
@@ -81,7 +81,7 @@ void window_size_updated(struct lys_context *ctx, struct futhark_context *fut,
   SDL_ASSERT(ctx->surface != NULL);
 }
 
-void handle_sdl_events(struct lys_context *ctx, struct futhark_context *fut)
+void handle_sdl_events(struct lys_context *ctx)
 {
   SDL_Event event;
 
@@ -93,7 +93,7 @@ void handle_sdl_events(struct lys_context *ctx, struct futhark_context *fut)
         {
           int newx = (int)event.window.data1;
           int newy = (int)event.window.data2;
-          window_size_updated(ctx, fut, newx, newy);
+          window_size_updated(ctx, newx, newy);
           break;
         }
       }
@@ -124,23 +124,29 @@ void handle_sdl_events(struct lys_context *ctx, struct futhark_context *fut)
   }
 }
 
-void sdl_loop(struct lys_context *ctx, struct futhark_context *fut)
+void sdl_loop(struct lys_context *ctx)
 {
   struct futhark_i32_2d *out_arr;
 
   while (ctx->running) {
     int64_t now = get_wall_time();
-    float time = ((float)(now - ctx->start_time))/1000000;
-    FUT_CHECK(fut, futhark_entry_render(fut, &out_arr, time, ctx->height, ctx->width));
-    FUT_CHECK(fut, futhark_values_i32_2d(fut, out_arr, ctx->data));
-    FUT_CHECK(fut, futhark_free_i32_2d(fut, out_arr));
+    float delta = ((float)(now - ctx->last_time))/1000000;
+    ctx->last_time = now;
+    struct futhark_opaque_state *new_state;
+    FUT_CHECK(ctx->fut, futhark_entry_step(ctx->fut, &new_state, delta, ctx->state));
+    futhark_free_opaque_state(ctx->fut, ctx->state);
+    ctx->state = new_state;
+
+    FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state, ctx->height, ctx->width));
+    FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, out_arr, ctx->data));
+    FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, out_arr));
 
     SDL_ASSERT(SDL_BlitSurface(ctx->surface, NULL, ctx->wnd_surface, NULL)==0);
     SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
 
     SDL_Delay(1000 / FPS);
 
-    handle_sdl_events(ctx, fut);
+    handle_sdl_events(ctx);
   }
 }
 
@@ -149,7 +155,9 @@ void do_sdl(struct futhark_context *fut)
   struct lys_context ctx;
   memset(&ctx, 0, sizeof(struct lys_context));
 
-  ctx.start_time = get_wall_time();
+  ctx.last_time = get_wall_time();
+  ctx.fut = fut;
+  futhark_entry_init(fut, &ctx.state);
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
 
@@ -159,10 +167,11 @@ void do_sdl(struct futhark_context *fut)
                      INITIAL_WIDTH, INITIAL_HEIGHT, SDL_WINDOW_RESIZABLE);
   SDL_ASSERT(ctx.wnd != NULL);
 
-  window_size_updated(&ctx, fut, INITIAL_WIDTH, INITIAL_HEIGHT);
+  window_size_updated(&ctx, INITIAL_WIDTH, INITIAL_HEIGHT);
 
   ctx.running = 1;
-  sdl_loop(&ctx, fut);
+  sdl_loop(&ctx);
+  FUT_CHECK(fut, futhark_free_opaque_state(fut, ctx.state));
 
   free(ctx.data);
   SDL_FreeSurface(ctx.surface);
