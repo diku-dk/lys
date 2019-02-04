@@ -12,7 +12,10 @@ endif
 $(PROGNAME): $(PROGNAME).o lib/github.com/diku-dk/lys/liblys.c
 	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME).h"' $(PROGNAME).o -o lys $(LDFLAGS)
 
-%.c: %.fut
+lib: futhark.pkg
+	futhark pkg sync
+
+%.c: %.fut lib
 	futhark opencl --library $<
 
 run: lys
