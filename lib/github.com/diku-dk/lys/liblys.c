@@ -7,6 +7,13 @@
 #include <assert.h>
 #include <SDL2/SDL.h>
 #include <time.h>
+#include <sys/time.h>
+
+static int64_t get_wall_time(void) {
+  struct timeval time;
+  assert(gettimeofday(&time,NULL) == 0);
+  return time.tv_sec * 1000000 + time.tv_usec;
+}
 
 #define FPS 30
 #define INITIAL_WIDTH 250
@@ -41,6 +48,7 @@ struct lys_context {
   int width;
   int height;
   int32_t *data;
+  int64_t start_time;
   int vx;
   int vy;
   int running;
@@ -121,7 +129,9 @@ void sdl_loop(struct lys_context *ctx, struct futhark_context *fut)
   struct futhark_i32_2d *out_arr;
 
   while (ctx->running) {
-    FUT_CHECK(fut, futhark_entry_render(fut, &out_arr, ctx->height, ctx->width));
+    int64_t now = get_wall_time();
+    float time = ((float)(now - ctx->start_time))/1000000;
+    FUT_CHECK(fut, futhark_entry_render(fut, &out_arr, time, ctx->height, ctx->width));
     FUT_CHECK(fut, futhark_values_i32_2d(fut, out_arr, ctx->data));
     FUT_CHECK(fut, futhark_free_i32_2d(fut, out_arr));
 
@@ -138,6 +148,8 @@ void do_sdl(struct futhark_context *fut)
 {
   struct lys_context ctx;
   memset(&ctx, 0, sizeof(struct lys_context));
+
+  ctx.start_time = get_wall_time();
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
 
