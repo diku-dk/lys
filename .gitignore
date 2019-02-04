@@ -1,4 +1,4 @@
-*.o
-lys.h
-lys.c
-lys
+/*.o
+/lys.h
+/lys.c
+/lys
