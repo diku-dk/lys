@@ -19,7 +19,7 @@ lib: futhark.pkg
 	futhark pkg sync
 
 # We do not want warnings and such for the generated code.
-lys_wrapper.o: lys_wrapper.c
+$(PROGNAME)_wrapper.o: $(PROGNAME)_wrapper.c
 	gcc -o $@ -c $< $(NOWARN_CFLAGS)
 
 %.c: %.fut lib
