@@ -7,6 +7,7 @@ addons:
     - wget
     - libgmp-dev
     - libsdl2-dev
+    - opencl-headers
 
 before_install:
  # install Futhark
@@ -18,9 +19,9 @@ install:
   - futhark-pkg sync
 
 script:
-  - futhark-test lib
+  - futhark test lib
   - make
-  - futhark-pkg upgrade
-  - futhark-pkg sync
-  - futhark-test lib
+  - futhark pkg upgrade
+  - futhark pkg sync
+  - futhark test lib
   - make
