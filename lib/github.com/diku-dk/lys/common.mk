@@ -2,6 +2,9 @@ PROGNAME?=lys
 
 all: $(PROGNAME)
 
+NOWARN_CFLAGS=-std=c99 -O
+CFLAGS?=$(NOWARN_CFLAGS) -Wall -Wextra -pedantic
+
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
 LDFLAGS?=-framework OpenCL -lm -lSDL2
@@ -14,6 +17,10 @@ $(PROGNAME): $(PROGNAME)_wrapper.o lib/github.com/diku-dk/lys/liblys.c
 
 lib: futhark.pkg
 	futhark pkg sync
+
+# We do not want warnings and such for the generated code.
+lys_wrapper.o: lys_wrapper.c
+	gcc -o $@ -c $< $(NOWARN_CFLAGS)
 
 %.c: %.fut lib
 	futhark opencl --library $<
