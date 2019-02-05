@@ -35,3 +35,9 @@ library with associated header files.  On Debian-like systems
 ```
 # sudo apt install libsdl2-dev
 ```
+
+On macOS with [Homebrew](https://brew.sh), run
+
+```
+$ brew install sdl2 sdl2_gfx sdl2_image sdl2_ttf
+```
