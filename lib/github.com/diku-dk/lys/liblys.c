@@ -50,8 +50,6 @@ struct lys_context {
   int height;
   int32_t *data;
   int64_t last_time;
-  int vx;
-  int vy;
   int running;
 };
 
