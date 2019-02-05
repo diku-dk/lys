@@ -32,4 +32,4 @@ run: $(PROGNAME)
 	./$(PROGNAME)
 
 clean:
-	rm -f $(PROGNAME) $(PROGNAME).c $(PROGNAME).h *.o
+	rm -f $(PROGNAME) $(PROGNAME).c $(PROGNAME).h $(PROGNAME)_wrapper.* *.o
