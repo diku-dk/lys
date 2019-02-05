@@ -12,7 +12,9 @@ entry init (h: i32) (w: i32): state = m.lys.init h w
 
 entry resize (h: i32) (w: i32) (s: state): state = m.lys.resize h w s
 
-entry keypress (key: i32) (s: state): state = m.lys.keypress key s
+entry key (e: i32) (key: i32) (s: state): state =
+  let e' = if e == 0 then #keydown else #keyup
+  in m.lys.key e' key s
 
 entry step (td: f32) (s: state): state = m.lys.step td s
 

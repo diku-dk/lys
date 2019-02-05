@@ -3,6 +3,8 @@
 -- | For convenience, re-export the colour module.
 open import "../../athas/matte/colour"
 
+type key_event = #keydown | #keyup
+
 module type lys = {
   type state
 
@@ -15,8 +17,8 @@ module type lys = {
   -- | The window was resized.
   val resize : (h: i32) -> (w: i32) -> state -> state
 
-  -- | Someone pressed a key!
-  val keypress : i32 -> state -> state
+  -- | Something happened to the keyboard.
+  val key : key_event -> i32 -> state -> state
 
   -- | The function for rendering a screen image in row-major order
   -- (height by width).  The size of the array returned must match the
@@ -32,7 +34,7 @@ module lys: lys = {
   let init h w: state = {h,w}
   let step _ s: state = s
   let resize h w _: state = {h,w}
-  let keypress _ s: state = s
+  let key _ _ s: state = s
   let render {h,w} = replicate w argb.black |> replicate h
 }
 
