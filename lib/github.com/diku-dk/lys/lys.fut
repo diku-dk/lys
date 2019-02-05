@@ -20,6 +20,9 @@ module type lys = {
   -- | Something happened to the keyboard.
   val key : key_event -> i32 -> state -> state
 
+  -- | Something happened to the mouse.
+  val mouse : (mouse_state: i32) -> (x: i32) -> (y: i32) -> state -> state
+
   -- | The function for rendering a screen image in row-major order
   -- (height by width).  The size of the array returned must match the
   -- last dimensions provided to the state (via `init`@term or
@@ -35,6 +38,7 @@ module lys: lys = {
   let step _ s: state = s
   let resize h w _: state = {h,w}
   let key _ _ s: state = s
+  let mouse _ _ _ s = s
   let render {h,w} = replicate w argb.black |> replicate h
 }
 

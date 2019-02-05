@@ -16,6 +16,9 @@ entry key (e: i32) (key: i32) (s: state): state =
   let e' = if e == 0 then #keydown else #keyup
   in m.lys.key e' key s
 
+entry mouse (mstate: i32) (x: i32) (y: i32) (s: state): state =
+  m.lys.mouse mstate x y s
+
 entry step (td: f32) (s: state): state = m.lys.step td s
 
 entry render (s: state) = m.lys.render s

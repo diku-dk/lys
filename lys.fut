@@ -8,9 +8,15 @@ let rotate_point (x: f32) (y: f32) (angle: f32) =
   in (xnew, ynew)
 
 module lys: lys = {
-  type state = {time: f32, h: i32, w: i32, center: (i32, i32), moving: (i32, i32)}
+  type state = {time: f32, h: i32, w: i32,
+                center: (i32, i32),
+                moving: (i32, i32),
+                mouse: (i32, i32) }
 
-  let init (h: i32) (w: i32): state = {time = 0, w, h, center=(h/2,w/2), moving = (0,0)}
+  let init (h: i32) (w: i32): state = {time = 0, w, h,
+                                       center=(h/2,w/2),
+                                       moving = (0,0),
+                                       mouse = (0,0)}
 
   let resize (h: i32) (w: i32) (s: state) =
     s with h = h with w = w
@@ -30,7 +36,12 @@ module lys: lys = {
       else if key == SDLK_DOWN then s with moving.1 = 0
       else s
 
-  let move (x: i32, y: i32) (dx,dy) = (x+dx*10, y+dy*10)
+  let move (x: i32, y: i32) (dx,dy) = (x+dx, y+dy)
+  let diff (x1: i32, y1: i32) (x2, y2) = (x2 - x1, y2 - y1)
+
+  let mouse (mouse_state: i32) (x: i32) (y: i32) (s: state) =
+    s with mouse = (y,x) with center = if mouse_state != 0 then move s.center (diff s.mouse (y,x))
+                                       else s.center
 
   let step td (s: state) =
     s with time = td + s.time with center = move s.center s.moving
