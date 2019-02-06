@@ -19,6 +19,9 @@ entry key (e: i32) (key: i32) (s: state): state =
 entry mouse (mstate: i32) (x: i32) (y: i32) (s: state): state =
   m.lys.mouse mstate x y s
 
+entry wheel (x: i32) (y: i32) (s: state): state =
+  m.lys.wheel x y s
+
 entry step (td: f32) (s: state): state = m.lys.step td s
 
 entry render (s: state) = m.lys.render s

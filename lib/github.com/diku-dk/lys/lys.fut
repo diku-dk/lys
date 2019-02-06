@@ -23,6 +23,10 @@ module type lys = {
   -- | Something happened to the mouse.
   val mouse : (mouse_state: i32) -> (x: i32) -> (y: i32) -> state -> state
 
+  -- | The mouse wheel is turning.  Note that there can be multiple
+  -- wheels; this is why the 'x' direction also makes sense.
+  val wheel : (x: i32) -> (y: i32) -> state -> state
+
   -- | The function for rendering a screen image in row-major order
   -- (height by width).  The size of the array returned must match the
   -- last dimensions provided to the state (via `init`@term or
@@ -34,11 +38,12 @@ module type lys = {
 -- nothing in response to events.
 module lys: lys = {
   type state = {h: i32, w: i32}
-  let init h w: state = {h,w}
-  let step _ s: state = s
-  let resize h w _: state = {h,w}
-  let key _ _ s: state = s
+  let init h w = {h,w}
+  let step _ s = s
+  let resize h w _ = {h,w}
+  let key _ _ s = s
   let mouse _ _ _ s = s
+  let wheel _ _ s = s
   let render {h,w} = replicate w argb.black |> replicate h
 }
 

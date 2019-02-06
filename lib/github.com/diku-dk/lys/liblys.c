@@ -91,6 +91,13 @@ void mouse_event(struct lys_context *ctx, Uint32 state, int x, int y) {
   ctx->state = new_state;
 }
 
+void wheel_event(struct lys_context *ctx, int x, int y) {
+  struct futhark_opaque_state *new_state;
+  FUT_CHECK(ctx->fut, futhark_entry_wheel(ctx->fut, &new_state, x, y, ctx->state));
+  futhark_free_opaque_state(ctx->fut, ctx->state);
+  ctx->state = new_state;
+}
+
 void handle_sdl_events(struct lys_context *ctx)
 {
   SDL_Event event;
@@ -117,6 +124,9 @@ void handle_sdl_events(struct lys_context *ctx)
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
       mouse_event(ctx, event.button.state, event.motion.x, event.motion.y);
+      break;
+    case SDL_MOUSEWHEEL:
+      wheel_event(ctx, event.wheel.x, event.wheel.y);
       break;
     case SDL_KEYDOWN:
     case SDL_KEYUP:

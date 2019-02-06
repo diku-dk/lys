@@ -11,12 +11,14 @@ module lys: lys = {
   type state = {time: f32, h: i32, w: i32,
                 center: (i32, i32),
                 moving: (i32, i32),
-                mouse: (i32, i32) }
+                mouse: (i32, i32),
+                radius: i32 }
 
   let init (h: i32) (w: i32): state = {time = 0, w, h,
                                        center=(h/2,w/2),
                                        moving = (0,0),
-                                       mouse = (0,0)}
+                                       mouse = (0,0),
+                                       radius = 20 }
 
   let resize (h: i32) (w: i32) (s: state) =
     s with h = h with w = w
@@ -43,6 +45,8 @@ module lys: lys = {
     s with mouse = (y,x) with center = if mouse_state != 0 then move s.center (diff s.mouse (y,x))
                                        else s.center
 
+  let wheel _ y s: state = s with radius = i32.max 0 (s.radius + y)
+
   let step td (s: state) =
     s with time = td + s.time with center = move s.center s.moving
 
@@ -50,6 +54,6 @@ module lys: lys = {
     tabulate_2d (s.h) (s.w)
                 (\i j ->
                    let (i', j') = rotate_point (r32 (i-s.center.1)) (r32 (j-s.center.2)) s.time
-                   in if i'**2 + j'**2 < 200 then argb.white
+                   in if f32.sqrt (i'**2 + j'**2) < r32 s.radius then argb.white
                       else if i' > j' then argb.red else argb.blue)
 }
