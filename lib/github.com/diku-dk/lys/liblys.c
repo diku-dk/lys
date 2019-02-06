@@ -165,6 +165,7 @@ void sdl_loop(struct lys_context *ctx)
 
     int64_t render_start = get_wall_time();
     FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state));
+    FUT_CHECK(ctx->fut, futhark_context_sync(ctx->fut));
     int64_t render_end = get_wall_time();
     double render_milliseconds = ((float) (render_end - render_start)) / 1000.0;
     FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, out_arr, ctx->data));
