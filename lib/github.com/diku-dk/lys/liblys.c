@@ -119,11 +119,11 @@ void handle_sdl_events(struct lys_context *ctx)
       ctx->running = 0;
       break;
     case SDL_MOUSEMOTION:
-      mouse_event(ctx, event.motion.state, event.motion.x, event.motion.y);
+      mouse_event(ctx, 0, event.motion.x, event.motion.y);
       break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
-      mouse_event(ctx, event.button.state, event.motion.x, event.motion.y);
+      mouse_event(ctx, event.button.button, event.motion.x, event.motion.y);
       break;
     case SDL_MOUSEWHEEL:
       wheel_event(ctx, event.wheel.x, event.wheel.y);
