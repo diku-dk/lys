@@ -6,6 +6,7 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <time.h>
 #include <sys/time.h>
 
@@ -46,6 +47,7 @@ struct lys_context {
   SDL_Window *wnd;
   SDL_Surface *wnd_surface;
   SDL_Surface *surface;
+  TTF_Font *font;
   int width;
   int height;
   int32_t *data;
@@ -161,11 +163,27 @@ void sdl_loop(struct lys_context *ctx)
     futhark_free_opaque_state(ctx->fut, ctx->state);
     ctx->state = new_state;
 
+    int64_t render_start = get_wall_time();
     FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state));
+    int64_t render_end = get_wall_time();
+    double render_milliseconds = ((float) (render_end - render_start)) / 1000.0;
     FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, out_arr, ctx->data));
     FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, out_arr));
 
     SDL_ASSERT(SDL_BlitSurface(ctx->surface, NULL, ctx->wnd_surface, NULL)==0);
+
+    SDL_Color black = { .r = 0x0, .g = 0x00, .b = 0x00, .a = 0xff };
+    char text[30];
+    snprintf(text, sizeof(text) / sizeof(char),
+             "Futhark render: %.2lf ms", render_milliseconds);
+    SDL_Surface *text_surface = TTF_RenderUTF8_Blended(ctx->font, text, black);
+    SDL_ASSERT(text_surface != NULL);
+    SDL_Rect offset_rect = { .x = 10, .y = 10,
+                             .w = text_surface->w, .h = text_surface->h };
+    SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
+                               ctx->wnd_surface, &offset_rect) == 0);
+    SDL_FreeSurface(text_surface);
+
     SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
 
     SDL_Delay(1000 / FPS);
@@ -184,6 +202,10 @@ void do_sdl(struct futhark_context *fut)
   futhark_entry_init(fut, &ctx.state, INITIAL_HEIGHT, INITIAL_WIDTH);
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
+  SDL_ASSERT(TTF_Init() == 0);
+
+  ctx.font = TTF_OpenFont("lib/github.com/diku-dk/lys/Inconsolata-Regular.ttf", 30);
+  SDL_ASSERT(ctx.font != NULL);
 
   ctx.wnd =
     SDL_CreateWindow("Lys",
@@ -199,6 +221,7 @@ void do_sdl(struct futhark_context *fut)
 
   free(ctx.data);
   SDL_FreeSurface(ctx.surface);
+  TTF_CloseFont(ctx.font);
   // do not free wnd_surface (see SDL_GetWindowSurface)
   SDL_DestroyWindow(ctx.wnd);
   SDL_Quit();

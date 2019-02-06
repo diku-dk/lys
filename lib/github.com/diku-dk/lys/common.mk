@@ -7,10 +7,11 @@ CFLAGS?=$(NOWARN_CFLAGS) -Wall -Wextra -pedantic
 
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
-LDFLAGS?=-framework OpenCL -lm -lSDL2
+OPENCLFLAGS?=-framework OpenCL
 else
-LDFLAGS?=-lOpenCL -lm -lSDL2
+OPENCLFLAGS?=-lOpenCL
 endif
+LDFLAGS?=$(OPENCLFLAGS) -lm -lSDL2 -lSDL2_ttf
 
 $(PROGNAME): $(PROGNAME)_wrapper.o lib/github.com/diku-dk/lys/liblys.c
 	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME)_wrapper.h"' $(PROGNAME)_wrapper.o -o $@ $(LDFLAGS)

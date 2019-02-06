@@ -29,11 +29,11 @@ module named `lys` of module type `lys` ([example](lys.fut)).  Run
 ## Requirements
 
 Lys is written in C, and requires a working C compiler and the SDL2
-library with associated header files.  On Debian-like systems
-(including Ubuntu), this can be installed with
+and SDL2-ttf libraries with associated header files.  On Debian-like
+systems (including Ubuntu), this can be installed with
 
 ```
-# sudo apt install libsdl2-dev
+# apt install libsdl2-dev libsdl2-ttf-dev
 ```
 
 On macOS with [Homebrew](https://brew.sh), run
