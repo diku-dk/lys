@@ -7,6 +7,7 @@ addons:
     - wget
     - libgmp-dev
     - libsdl2-dev
+    - libsdl2-ttf-dev
     - ocl-icd-libopencl1
     - opencl-headers
 
