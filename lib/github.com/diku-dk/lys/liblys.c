@@ -9,6 +9,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 static int64_t get_wall_time(void) {
   struct timeval time;
@@ -188,13 +189,13 @@ void sdl_loop(struct lys_context *ctx) {
   }
 }
 
-void do_sdl(struct futhark_context *fut) {
+void do_sdl(struct futhark_context *fut, int height, int width) {
   struct lys_context ctx;
   memset(&ctx, 0, sizeof(struct lys_context));
 
   ctx.last_time = get_wall_time();
   ctx.fut = fut;
-  futhark_entry_init(fut, &ctx.state, INITIAL_HEIGHT, INITIAL_WIDTH);
+  futhark_entry_init(fut, &ctx.state, height, width);
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
   SDL_ASSERT(TTF_Init() == 0);
@@ -205,10 +206,10 @@ void do_sdl(struct futhark_context *fut) {
   ctx.wnd =
     SDL_CreateWindow("Lys",
                      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                     INITIAL_WIDTH, INITIAL_HEIGHT, SDL_WINDOW_RESIZABLE);
+                     width, height, SDL_WINDOW_RESIZABLE);
   SDL_ASSERT(ctx.wnd != NULL);
 
-  window_size_updated(&ctx, INITIAL_WIDTH, INITIAL_HEIGHT);
+  window_size_updated(&ctx, width, height);
 
   ctx.running = 1;
   sdl_loop(&ctx);
@@ -222,13 +223,36 @@ void do_sdl(struct futhark_context *fut) {
   SDL_Quit();
 }
 
-int main() {
+int main(int argc, char** argv) {
+  int width = INITIAL_WIDTH, height = INITIAL_HEIGHT;
+
+  int c;
+
+  while ( (c = getopt(argc, argv, "w:h:")) != -1) {
+    switch (c) {
+    case 'w':
+      width = atoi(optarg);
+      if (width <= 0) {
+        fprintf(stderr, "'%s' is not a valid width.\n", optarg);
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case 'h':
+      height = atoi(optarg);
+      if (height <= 0) {
+        fprintf(stderr, "'%s' is not a valid width.\n", optarg);
+        exit(EXIT_FAILURE);
+      }
+      break;
+    }
+  }
+
   struct futhark_context_config *cfg = futhark_context_config_new();
   assert(cfg != NULL);
   struct futhark_context *ctx = futhark_context_new(cfg);
   assert(ctx != NULL);
 
-  do_sdl(ctx);
+  do_sdl(ctx, height, width);
 
   futhark_context_free(ctx);
   futhark_context_config_free(cfg);
