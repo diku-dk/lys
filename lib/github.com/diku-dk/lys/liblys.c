@@ -1,6 +1,7 @@
 // Convenience framework for writing visualisations with Futhark and
 // C/SDL.
 
+#define _XOPEN_SOURCE
 #include PROGHEADER
 
 #include <inttypes.h>
@@ -208,7 +209,7 @@ void sdl_loop(struct lys_context *ctx) {
     text_color.a = 0xff;
     char text[200];
     int y = 10;
-    for (size_t i = 0; i < tss_shape[0]; i++) {
+    for (size_t i = 0; i < (size_t) tss_shape[0]; i++) {
       int32_t *s_i = ss + i * ss_shape[1];
       char s[100];
       for (size_t k = 0; k < 100; k++) {
@@ -225,7 +226,7 @@ void sdl_loop(struct lys_context *ctx) {
 
       size_t arg_len = 20;
       char* args = malloc(sizeof(char) * arg_len * tss_shape[1]);
-      for (size_t j = 0; j < tss_shape[1]; j++) {
+      for (size_t j = 0; j < (size_t) tss_shape[1]; j++) {
         char *arg = args + j * arg_len;
         if (ts[j] == 1) {
           snprintf(arg, arg_len, "%.2f", fs[j]);
