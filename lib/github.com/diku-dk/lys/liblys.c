@@ -244,7 +244,18 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
       }
       break;
+    default:
+      fprintf(stderr, "unknown option: %c\n", c);
+      exit(EXIT_FAILURE);
     }
+  }
+
+  if (optind < argc) {
+    fprintf(stderr, "Excess non-options: ");
+    while (optind < argc)
+      fprintf(stderr, "%s ", argv[optind++]);
+    fprintf(stderr, "\n");
+    exit(EXIT_FAILURE);
   }
 
   struct futhark_context_config *cfg = futhark_context_config_new();
