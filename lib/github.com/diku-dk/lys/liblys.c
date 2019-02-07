@@ -17,7 +17,7 @@ static int64_t get_wall_time(void) {
   return time.tv_sec * 1000000 + time.tv_usec;
 }
 
-#define FPS 30
+#define FPS 60
 #define INITIAL_WIDTH 250
 #define INITIAL_HEIGHT 250
 
@@ -183,7 +183,7 @@ void sdl_loop(struct lys_context *ctx) {
 
     SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
 
-    SDL_Delay(1000 / FPS);
+    SDL_Delay((int) (1000.0 / FPS - delta / 1000));
 
     handle_sdl_events(ctx);
   }
