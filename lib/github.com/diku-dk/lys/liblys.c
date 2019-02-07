@@ -163,23 +163,112 @@ void sdl_loop(struct lys_context *ctx) {
     FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state));
     FUT_CHECK(ctx->fut, futhark_context_sync(ctx->fut));
     int64_t render_end = get_wall_time();
-    double render_milliseconds = ((float) (render_end - render_start)) / 1000.0;
+    float render_milliseconds = ((float) (render_end - render_start)) / 1000.0;
     FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, out_arr, ctx->data));
     FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, out_arr));
 
     SDL_ASSERT(SDL_BlitSurface(ctx->surface, NULL, ctx->wnd_surface, NULL)==0);
 
-    SDL_Color black = { .r = 0x0, .g = 0x00, .b = 0x00, .a = 0xff };
-    char text[30];
-    snprintf(text, sizeof(text) / sizeof(char),
-             "Futhark render: %.2lf ms", render_milliseconds);
-    SDL_Surface *text_surface = TTF_RenderUTF8_Blended(ctx->font, text, black);
-    SDL_ASSERT(text_surface != NULL);
-    SDL_Rect offset_rect = { .x = 10, .y = 10,
-                             .w = text_surface->w, .h = text_surface->h };
-    SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
-                               ctx->wnd_surface, &offset_rect) == 0);
-    SDL_FreeSurface(text_surface);
+
+    struct futhark_i32_2d *f_ss;
+    struct futhark_i32_2d *f_tss;
+    struct futhark_f32_2d *f_fss;
+    struct futhark_i32_2d *f_iss;
+    struct futhark_i32_1d *f_cs;
+    FUT_CHECK(ctx->fut, futhark_entry_text(ctx->fut, &f_ss, &f_tss,
+                                           &f_fss, &f_iss, &f_cs,
+                                           render_milliseconds, ctx->state));
+    int64_t *ss_shape = futhark_shape_i32_2d(ctx->fut, f_ss);
+    int64_t *tss_shape = futhark_shape_i32_2d(ctx->fut, f_tss);
+    int64_t *fss_shape = futhark_shape_f32_2d(ctx->fut, f_fss);
+    int64_t *iss_shape = futhark_shape_i32_2d(ctx->fut, f_iss);
+    int64_t *cs_shape = futhark_shape_i32_1d(ctx->fut, f_cs);
+
+    int32_t *ss = malloc(sizeof(int32_t) * ss_shape[0] * ss_shape[1]);
+    assert(ss != NULL);
+    int32_t *tss = malloc(sizeof(int32_t) * tss_shape[0] * tss_shape[1]);
+    assert(tss != NULL);
+    float *fss = malloc(sizeof(float) * fss_shape[0] * fss_shape[1]);
+    assert(fss != NULL);
+    int32_t *iss = malloc(sizeof(int32_t) * iss_shape[0] * iss_shape[1]);
+    assert(iss != NULL);
+    int32_t *cs = malloc(sizeof(int32_t) * cs_shape[0]);
+    assert(cs != NULL);
+
+    FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, f_ss, ss));
+    FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, f_tss, tss));
+    FUT_CHECK(ctx->fut, futhark_values_f32_2d(ctx->fut, f_fss, fss));
+    FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, f_iss, iss));
+    FUT_CHECK(ctx->fut, futhark_values_i32_1d(ctx->fut, f_cs, cs));
+
+    SDL_Surface *text_surface;
+    SDL_Rect offset_rect;
+    offset_rect.x = 10;
+    SDL_Color text_color;
+    text_color.a = 0xff;
+    char text[200];
+    int y = 10;
+    for (size_t i = 0; i < tss_shape[0]; i++) {
+      int32_t *s_i = ss + i * ss_shape[1];
+      char s[100];
+      for (size_t k = 0; k < 100; k++) {
+        s[k] = (char) s_i[k];
+      }
+
+      int32_t *ts = tss + tss_shape[1] * i;
+      float *fs = fss + fss_shape[1] * i;
+      int32_t *is = iss + iss_shape[1] * i;
+
+      text_color.r = (cs[i] >> 16) & 0xff;
+      text_color.g = (cs[i] >> 8) & 0xff;
+      text_color.b = cs[i] & 0xff;
+
+      size_t arg_len = 20;
+      char* args = malloc(sizeof(char) * arg_len * tss_shape[1]);
+      for (size_t j = 0; j < tss_shape[1]; j++) {
+        char *arg = args + j * arg_len;
+        if (ts[j] == 1) {
+          snprintf(arg, arg_len, "%.2f", fs[j]);
+        } else if (ts[j] == 2) {
+          snprintf(arg, arg_len, "%d", is[j]);
+        }
+      }
+      if (tss_shape[1] == 0) {
+        snprintf(text, sizeof(text) / sizeof(char), "%s", s);
+      } else if (tss_shape[1] == 1) {
+        snprintf(text, sizeof(text) / sizeof(char), s, args);
+      } else if (tss_shape[1] == 2) {
+        snprintf(text, sizeof(text) / sizeof(char), s, args, args + arg_len);
+      } else if (tss_shape[1] == 3) {
+        snprintf(text, sizeof(text) / sizeof(char),
+                 s, args, args + arg_len, args + 2 * arg_len);
+      } else if (tss_shape[1] == 4) {
+        snprintf(text, sizeof(text) / sizeof(char),
+                 s, args, args + arg_len, args + 2 * arg_len, args + 3 * arg_len);
+      }
+      free(args);
+      text_surface = TTF_RenderUTF8_Blended(ctx->font, text, text_color);
+      SDL_ASSERT(text_surface != NULL);
+      offset_rect.y = y;
+      offset_rect.w = text_surface->w;
+      offset_rect.h = text_surface->h;
+      SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
+                                 ctx->wnd_surface, &offset_rect) == 0);
+      SDL_FreeSurface(text_surface);
+      y += 30;
+    }
+
+    free(ss);
+    free(tss);
+    free(fss);
+    free(iss);
+    free(cs);
+    FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, f_ss));
+    FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, f_tss));
+    FUT_CHECK(ctx->fut, futhark_free_f32_2d(ctx->fut, f_fss));
+    FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, f_iss));
+    FUT_CHECK(ctx->fut, futhark_free_i32_1d(ctx->fut, f_cs));
+
 
     SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
 

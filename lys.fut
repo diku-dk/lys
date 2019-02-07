@@ -56,4 +56,19 @@ module lys: lys = {
                    let (i', j') = rotate_point (r32 (i-s.center.1)) (r32 (j-s.center.2)) s.time
                    in if f32.sqrt (i'**2 + j'**2) < r32 s.radius then argb.white
                       else if i' > j' then argb.red else argb.blue)
+
+  let text (render_duration: f32) (s: state): []printf_input =
+    [ (spad "Futhark render: %s ms",
+       [ (#f32, printf_val with f32 = render_duration)
+       , printf_placeholder
+       ], argb.black)
+    , (spad "Center: (%s, %s)",
+       [ (#i32, printf_val with i32 = s.center.1)
+       , (#i32, printf_val with i32 = s.center.2)
+       ], argb.green)
+    , (spad "Radius: %s",
+       [ (#i32, printf_val with i32 = s.radius)
+       , printf_placeholder
+       ], argb.white)
+    ]
 }
