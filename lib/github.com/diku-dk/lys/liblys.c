@@ -21,8 +21,7 @@ static int64_t get_wall_time(void) {
 #define INITIAL_HEIGHT 250
 
 #define SDL_ASSERT(x) _sdl_assert(x, __FILE__, __LINE__)
-static inline void _sdl_assert(int res, const char *file, int line)
-{
+static inline void _sdl_assert(int res, const char *file, int line) {
   if (res == 0) {
     fprintf(stderr, "%s:%d: SDL error %d: %s\n",
             file, line, res, SDL_GetError());
@@ -32,8 +31,7 @@ static inline void _sdl_assert(int res, const char *file, int line)
 
 #define FUT_CHECK(ctx, x) _fut_check(ctx, x, __FILE__, __LINE__)
 static inline void _fut_check(struct futhark_context *ctx, int res,
-                              const char *file, int line)
-{
+                              const char *file, int line) {
   if (res != 0) {
     fprintf(stderr, "%s:%d: Futhark error %d: %s\n",
             file, line, res, futhark_context_get_error(ctx));
@@ -55,8 +53,7 @@ struct lys_context {
   int running;
 };
 
-void window_size_updated(struct lys_context *ctx, int newx, int newy)
-{
+void window_size_updated(struct lys_context *ctx, int newx, int newy) {
   // https://stackoverflow.com/a/40122002
   ctx->wnd_surface = SDL_GetWindowSurface(ctx->wnd);
   SDL_ASSERT(ctx->wnd_surface != NULL);
@@ -100,8 +97,7 @@ void wheel_event(struct lys_context *ctx, int x, int y) {
   ctx->state = new_state;
 }
 
-void handle_sdl_events(struct lys_context *ctx)
-{
+void handle_sdl_events(struct lys_context *ctx) {
   SDL_Event event;
 
   while (SDL_PollEvent(&event) == 1) {
@@ -150,8 +146,7 @@ void handle_sdl_events(struct lys_context *ctx)
   }
 }
 
-void sdl_loop(struct lys_context *ctx)
-{
+void sdl_loop(struct lys_context *ctx) {
   struct futhark_i32_2d *out_arr;
 
   while (ctx->running) {
@@ -193,8 +188,7 @@ void sdl_loop(struct lys_context *ctx)
   }
 }
 
-void do_sdl(struct futhark_context *fut)
-{
+void do_sdl(struct futhark_context *fut) {
   struct lys_context ctx;
   memset(&ctx, 0, sizeof(struct lys_context));
 
@@ -228,8 +222,7 @@ void do_sdl(struct futhark_context *fut)
   SDL_Quit();
 }
 
-int main()
-{
+int main() {
   struct futhark_context_config *cfg = futhark_context_config_new();
   assert(cfg != NULL);
   struct futhark_context *ctx = futhark_context_new(cfg);
