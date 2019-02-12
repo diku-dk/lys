@@ -313,12 +313,38 @@ void do_sdl(struct futhark_context *fut, int height, int width) {
   SDL_Quit();
 }
 
+void create_futhark_context(const char *deviceopt,
+                            struct futhark_context_config **cfg,
+                            struct futhark_context **ctx) {
+  *cfg = futhark_context_config_new();
+  assert(*cfg != NULL);
+  futhark_context_config_set_device(*cfg, deviceopt);
+  *ctx = futhark_context_new(*cfg);
+  assert(*ctx != NULL);
+
+  cl_device_id device;
+  assert(clGetCommandQueueInfo(futhark_context_get_command_queue(*ctx),
+                               CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL)
+         == CL_SUCCESS);
+
+  size_t dev_name_size;
+  assert(clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &dev_name_size)
+         == CL_SUCCESS);
+  char *dev_name = malloc(dev_name_size);
+  assert(clGetDeviceInfo(device, CL_DEVICE_NAME, dev_name_size, dev_name, NULL)
+         == CL_SUCCESS);
+
+  printf("Using OpenCL device: %s\n", dev_name);
+  free(dev_name);
+}
+
 int main(int argc, char** argv) {
   int width = INITIAL_WIDTH, height = INITIAL_HEIGHT;
+  char *deviceopt = "";
 
   int c;
 
-  while ( (c = getopt(argc, argv, "w:h:")) != -1) {
+  while ( (c = getopt(argc, argv, "w:h:d:")) != -1) {
     switch (c) {
     case 'w':
       width = atoi(optarg);
@@ -334,6 +360,9 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
       }
       break;
+    case 'd':
+      deviceopt = optarg;
+      break;
     default:
       fprintf(stderr, "unknown option: %c\n", c);
       exit(EXIT_FAILURE);
@@ -348,11 +377,10 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  struct futhark_context_config *cfg = futhark_context_config_new();
-  assert(cfg != NULL);
-  struct futhark_context *ctx = futhark_context_new(cfg);
-  assert(ctx != NULL);
+  struct futhark_context_config* cfg;
+  struct futhark_context* ctx;
 
+  create_futhark_context(deviceopt, &cfg, &ctx);
   do_sdl(ctx, height, width);
 
   futhark_context_free(ctx);
