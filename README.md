@@ -41,3 +41,11 @@ On macOS with [Homebrew](https://brew.sh), run
 ```
 $ brew install sdl2 sdl2_gfx sdl2_image sdl2_ttf
 ```
+
+## Global keybindings
+
+These keybindings are common for all lys programs and cannot be
+overridden:
+
+  + ESC: Exit the program.
+  + F1: Toggle showing text.
