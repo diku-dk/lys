@@ -45,7 +45,7 @@ module lys: lys = {
     s with mouse = (y,x) with center = if mouse_state != 0 then move s.center (diff s.mouse (y,x))
                                        else s.center
 
-  let wheel _ y s: state = s with radius = i32.max 0 (s.radius + y)
+  let wheel _ y (s: state) = s with radius = i32.max 0 (s.radius + y)
 
   let step td (s: state) =
     s with time = td + s.time with center = move s.center s.moving
