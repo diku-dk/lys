@@ -1,4 +1,5 @@
 PROGNAME?=lys
+PROG_FUT_DEPS?=$(shell futhark imports $(PROGNAME).fut)
 
 all: $(PROGNAME)
 
@@ -26,7 +27,7 @@ $(PROGNAME)_wrapper.o: $(PROGNAME)_wrapper.c
 %.c: %.fut lib
 	futhark opencl --library $<
 
-%_wrapper.fut: lib/github.com/diku-dk/lys/genlys.fut $(PROGNAME).fut
+%_wrapper.fut: lib/github.com/diku-dk/lys/genlys.fut $(PROG_FUT_DEPS)
 	cat $< | sed 's/"lys"/"$(PROGNAME)"/' > $@
 
 run: $(PROGNAME)
