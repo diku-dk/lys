@@ -153,50 +153,52 @@ void sdl_loop(struct lys_context *ctx) {
     if (ctx->show_text) {
       build_text(ctx, ctx->text_buffer, ctx->text_buffer_len, ctx->text_format,
                  render_milliseconds);
-      uint32_t text_colour;
-      FUT_CHECK(ctx->fut,
-                futhark_entry_text_colour(ctx->fut, (int32_t*) &text_colour,
-                                          ctx->state));
-      SDL_Color sdl_text_colour =
-        { .a = (text_colour >> 24) & 0xff,
-          .r = (text_colour >> 16) & 0xff,
-          .g = (text_colour >> 8) & 0xff,
-          .b = text_colour & 0xff };
+      if (*(ctx->text_buffer) != '\0') {
+        uint32_t text_colour;
+        FUT_CHECK(ctx->fut,
+                  futhark_entry_text_colour(ctx->fut, (int32_t*) &text_colour,
+                                            ctx->state));
+        SDL_Color sdl_text_colour =
+          { .a = (text_colour >> 24) & 0xff,
+            .r = (text_colour >> 16) & 0xff,
+            .g = (text_colour >> 8) & 0xff,
+            .b = text_colour & 0xff };
 
-      SDL_Surface *text_surface;
-      SDL_Rect offset_rect;
-      offset_rect.x = 10;
-      int y = 10;
-      char* buffer = ctx->text_buffer;
-      while (true) {
-        char* buffer_start = buffer;
-
-        bool no_more_text = false;
+        SDL_Surface *text_surface;
+        SDL_Rect offset_rect;
+        offset_rect.x = 10;
+        int y = 10;
+        char* buffer = ctx->text_buffer;
         while (true) {
-          buffer++;
-          if (*buffer == '\n') {
-            *buffer = '\0';
-            break;
-          } else if (*buffer == '\0') {
-            no_more_text = true;
-            break;
+          char* buffer_start = buffer;
+
+          bool no_more_text = false;
+          while (true) {
+            buffer++;
+            if (*buffer == '\n') {
+              *buffer = '\0';
+              break;
+            } else if (*buffer == '\0') {
+              no_more_text = true;
+              break;
+            }
           }
-        }
 
-        text_surface = TTF_RenderUTF8_Blended(ctx->font, buffer_start, sdl_text_colour);
-        SDL_ASSERT(text_surface != NULL);
-        offset_rect.y = y;
-        offset_rect.w = text_surface->w;
-        offset_rect.h = text_surface->h;
-        SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
-                                   ctx->wnd_surface, &offset_rect) == 0);
-        SDL_FreeSurface(text_surface);
+          text_surface = TTF_RenderUTF8_Blended(ctx->font, buffer_start, sdl_text_colour);
+          SDL_ASSERT(text_surface != NULL);
+          offset_rect.y = y;
+          offset_rect.w = text_surface->w;
+          offset_rect.h = text_surface->h;
+          SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
+                                     ctx->wnd_surface, &offset_rect) == 0);
+          SDL_FreeSurface(text_surface);
 
-        if (no_more_text) {
-          break;
-        } else {
-          buffer++;
-          y += ctx->font_size;
+          if (no_more_text) {
+            break;
+          } else {
+            buffer++;
+            y += ctx->font_size;
+          }
         }
       }
     }
