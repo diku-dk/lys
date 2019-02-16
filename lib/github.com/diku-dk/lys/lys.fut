@@ -55,9 +55,9 @@ module lys: lys = {
   let mouse _ _ _ s = s
   let wheel _ _ s = s
   let render {h,w} = replicate w argb.black |> replicate h
-  let text_format = "%f"
-  type text_content = f32
-  let text_content d _ = d
+  let text_format = ""
+  type text_content = ()
+  let text_content _ _ = ()
   let text_colour _ = argb.black
 }
 

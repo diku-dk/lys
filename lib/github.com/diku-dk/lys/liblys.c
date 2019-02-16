@@ -251,6 +251,7 @@ void do_sdl(struct futhark_context *fut, int height, int width) {
   }
   ctx.text_buffer = malloc(sizeof(char) * ctx.text_buffer_len);
   assert(ctx.text_buffer != NULL);
+  ctx.text_buffer[0] = '\0';
 
   ctx.show_text = 1;
 
