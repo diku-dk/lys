@@ -212,7 +212,8 @@ void sdl_loop(struct lys_context *ctx) {
   }
 }
 
-void do_sdl(struct futhark_context *fut, int height, int width, char* font_path) {
+void do_sdl(struct futhark_context *fut, int height, int width,
+            bool allow_resize, char* font_path) {
   struct lys_context ctx;
   memset(&ctx, 0, sizeof(struct lys_context));
 
@@ -226,10 +227,14 @@ void do_sdl(struct futhark_context *fut, int height, int width, char* font_path)
   ctx.font = TTF_OpenFont(font_path, FONT_SIZE);
   SDL_ASSERT(ctx.font != NULL);
 
+  int flags = 0;
+  if (allow_resize) {
+    flags |= SDL_WINDOW_RESIZABLE;
+  }
   ctx.wnd =
     SDL_CreateWindow("Lys",
                      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                     width, height, SDL_WINDOW_RESIZABLE);
+                     width, height, flags);
   SDL_ASSERT(ctx.wnd != NULL);
 
   window_size_updated(&ctx, width, height);
@@ -298,11 +303,12 @@ void create_futhark_context(const char *deviceopt,
 
 int main(int argc, char** argv) {
   int width = INITIAL_WIDTH, height = INITIAL_HEIGHT;
+  bool allow_resize = true;
   char *deviceopt = "";
 
   int c;
 
-  while ( (c = getopt(argc, argv, "w:h:d:")) != -1) {
+  while ( (c = getopt(argc, argv, "w:h:Rd:")) != -1) {
     switch (c) {
     case 'w':
       width = atoi(optarg);
@@ -317,6 +323,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "'%s' is not a valid width.\n", optarg);
         exit(EXIT_FAILURE);
       }
+      break;
+    case 'R':
+      allow_resize = false;
       break;
     case 'd':
       deviceopt = optarg;
@@ -349,7 +358,7 @@ int main(int argc, char** argv) {
   struct futhark_context* ctx;
 
   create_futhark_context(deviceopt, &cfg, &ctx);
-  do_sdl(ctx, height, width, font_path);
+  do_sdl(ctx, height, width, allow_resize, font_path);
 
   free(font_path);
 
