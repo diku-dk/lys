@@ -211,7 +211,7 @@ void sdl_loop(struct lys_context *ctx) {
   }
 }
 
-void do_sdl(struct futhark_context *fut, int height, int width) {
+void do_sdl(struct futhark_context *fut, int height, int width, char* font_path) {
   struct lys_context ctx;
   memset(&ctx, 0, sizeof(struct lys_context));
 
@@ -223,7 +223,7 @@ void do_sdl(struct futhark_context *fut, int height, int width) {
   SDL_ASSERT(TTF_Init() == 0);
 
   ctx.font_size = 30;
-  ctx.font = TTF_OpenFont("lib/github.com/diku-dk/lys/Inconsolata-Regular.ttf", ctx.font_size);
+  ctx.font = TTF_OpenFont(font_path, ctx.font_size);
   SDL_ASSERT(ctx.font != NULL);
 
   ctx.wnd =
@@ -335,11 +335,23 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
+  char font_path_rel[] = "/lib/github.com/diku-dk/lys/Inconsolata-Regular.ttf";
+  char* font_path = malloc(sizeof(char) * strlen(argv[0]) + sizeof(font_path_rel));
+  assert(font_path != NULL);
+  strcpy(font_path, argv[0]);
+  char *last_dash = strrchr(font_path, '/');
+  if (last_dash != NULL) {
+    *last_dash = '\0';
+  }
+  strcat(font_path, font_path_rel);
+
   struct futhark_context_config* cfg;
   struct futhark_context* ctx;
 
   create_futhark_context(deviceopt, &cfg, &ctx);
-  do_sdl(ctx, height, width);
+  do_sdl(ctx, height, width, font_path);
+
+  free(font_path);
 
   futhark_context_free(ctx);
   futhark_context_config_free(cfg);
