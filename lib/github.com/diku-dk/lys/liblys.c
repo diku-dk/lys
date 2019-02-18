@@ -306,8 +306,18 @@ int main(int argc, char** argv) {
   bool allow_resize = true;
   char *deviceopt = "";
 
-  int c;
+  if (argc > 1 && strcmp(argv[1], "--help") == 0) {
+    printf("Usage: %s options...\n", argv[0]);
+    puts("Options:");
+    puts("  -w INT  Set the initial width of the window.");
+    puts("  -h INT  Set the initial height of the window.");
+    puts("  -R      Disallow resizing the window.");
+    puts("  -d DEV  Set the GPU device.");
+    puts("  --help  Print this help and exit.");
+    return 0;
+  }
 
+  int c;
   while ( (c = getopt(argc, argv, "w:h:Rd:")) != -1) {
     switch (c) {
     case 'w':
