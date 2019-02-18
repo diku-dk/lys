@@ -12,7 +12,6 @@ struct lys_context {
   SDL_Window *wnd;
   SDL_Surface *wnd_surface;
   SDL_Surface *surface;
-  int font_size;
   TTF_Font *font;
   int width;
   int height;

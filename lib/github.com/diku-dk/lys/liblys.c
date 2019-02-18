@@ -12,8 +12,9 @@
 #include <unistd.h>
 
 #define FPS 60
-#define INITIAL_WIDTH 250
-#define INITIAL_HEIGHT 250
+#define INITIAL_WIDTH 800
+#define INITIAL_HEIGHT 600
+#define FONT_SIZE 24
 
 #define SDL_ASSERT(x) _sdl_assert(x, __FILE__, __LINE__)
 static inline void _sdl_assert(int res, const char *file, int line) {
@@ -197,7 +198,7 @@ void sdl_loop(struct lys_context *ctx) {
             break;
           } else {
             buffer++;
-            y += ctx->font_size;
+            y += FONT_SIZE;
           }
         }
       }
@@ -222,8 +223,7 @@ void do_sdl(struct futhark_context *fut, int height, int width, char* font_path)
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
   SDL_ASSERT(TTF_Init() == 0);
 
-  ctx.font_size = 30;
-  ctx.font = TTF_OpenFont(font_path, ctx.font_size);
+  ctx.font = TTF_OpenFont(font_path, FONT_SIZE);
   SDL_ASSERT(ctx.font != NULL);
 
   ctx.wnd =
