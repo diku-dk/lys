@@ -7,7 +7,9 @@ let rotate_point (x: f32) (y: f32) (angle: f32) =
   let ynew = x * s + y * c
   in (xnew, ynew)
 
-module lys: lys = {
+type text_content = (f32, i32, i32, i32)
+module lys: lys with text_content = text_content = {
+  type text_content = (f32, i32, i32, i32)
   type state = {time: f32, h: i32, w: i32,
                 center: (i32, i32),
                 moving: (i32, i32),
@@ -59,7 +61,6 @@ module lys: lys = {
 
   let text_format = "Futhark render: %.2f ms\nCenter: (%d, %d)\nRadius: %d"
 
-  type text_content = (f32, i32, i32, i32)
   let text_content (render_duration: f32) (s: state): text_content =
     (render_duration, s.center.1, s.center.2, s.radius)
 
