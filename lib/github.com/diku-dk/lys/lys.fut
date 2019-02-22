@@ -44,6 +44,20 @@ module type lys = {
   val text_colour : state -> argb.colour
 }
 
+-- | A module type for the simple case where we don't want any text.
+module type lys_no_text = {
+  include lys with text_content = ()
+}
+
+-- A convenience module that can be `open`ed to give dummy definitions
+-- for the text-related functionality.
+module lys_no_text = {
+  let text_format = ""
+  type text_content = ()
+  let text_content _ _ = ()
+  let text_colour _ = argb.black
+}
+
 -- | A dummy lys module that just produces a black rectangle and does
 -- nothing in response to events.
 module lys: lys = {
@@ -55,10 +69,7 @@ module lys: lys = {
   let mouse _ _ _ s = s
   let wheel _ _ s = s
   let render {h,w} = replicate w argb.black |> replicate h
-  let text_format = ""
-  type text_content = ()
-  let text_content _ _ = ()
-  let text_colour _ = argb.black
+  open lys_no_text
 }
 
 module mk_lys (m: lys): lys = {
