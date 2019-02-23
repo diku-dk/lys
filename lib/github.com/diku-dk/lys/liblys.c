@@ -339,11 +339,9 @@ int main(int argc, char** argv) {
     case 'R':
       allow_resize = false;
       break;
-#ifdef LYS_BACKEND_opencl
     case 'd':
       deviceopt = optarg;
       break;
-#endif
     default:
       fprintf(stderr, "unknown option: %c\n", c);
       exit(EXIT_FAILURE);
