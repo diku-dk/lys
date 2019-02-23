@@ -59,3 +59,11 @@ overridden:
 ## Common command-line options
 
 Run `./lys --help` to see the available options.
+
+## Using the CUDA backend
+
+By default, the build rules defined in
+`lib/github.com/diku-dk/lys/common.mk` use Futhark's OpenCL backend.
+You can change it to use Futhark's CUDA backend by setting
+`LYS_BACKEND=cuda`, either in the Makefile or as an environment
+variable.
