@@ -26,6 +26,17 @@ Finally create a Futhark program `lys.fut` that defines at least a
 module named `lys` of module type `lys` ([example](lys.fut)).  Run
 `make` and a binary called `lys` will be compiled.
 
+If you don't want your binary to be called `lys`, set the `Makefile`
+variable `PROGNAME` to whatever you wish.  For example, if you use
+
+```make
+PROGNAME=spetakel
+include lib/github.com/diku-dk/lys/common.mk
+```
+
+then Lys will look for a Futhark program `spetakel.fut` and generate a
+binary named `spetakel`.
+
 ## Requirements
 
 Lys is written in C, and requires a working C compiler and the SDL2
