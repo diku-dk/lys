@@ -314,7 +314,7 @@ int main(int argc, char** argv) {
     puts("  -w INT  Set the initial width of the window.");
     puts("  -h INT  Set the initial height of the window.");
     puts("  -R      Disallow resizing the window.");
-    puts("  -d DEV  Set the OpenCL device.");
+    puts("  -d DEV  Set the computation device.");
     puts("  --help  Print this help and exit.");
     return 0;
   }
