@@ -36,6 +36,12 @@ systems (including Ubuntu), this can be installed with
 # apt install libsdl2-dev libsdl2-ttf-dev
 ```
 
+On RHEL/Fedora:
+
+```
+# yum install SDL2-devel SDL2_ttf-devel
+```
+
 On macOS with [Homebrew](https://brew.sh), run
 
 ```
