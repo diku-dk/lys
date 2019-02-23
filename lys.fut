@@ -14,13 +14,17 @@ module lys: lys with text_content = text_content = {
                 center: (i32, i32),
                 moving: (i32, i32),
                 mouse: (i32, i32),
-                radius: i32 }
+                radius: i32,
+                paused: bool
+               }
 
   let init (h: i32) (w: i32): state = {time = 0, w, h,
                                        center=(h/2,w/2),
                                        moving = (0,0),
                                        mouse = (0,0),
-                                       radius = 20 }
+                                       radius = 20,
+                                       paused = false
+                                      }
 
   let resize (h: i32) (w: i32) (s: state) =
     s with h = h with w = w
@@ -32,6 +36,7 @@ module lys: lys with text_content = text_content = {
       else if key == SDLK_LEFT then s with moving.2 = -1
       else if key == SDLK_UP then s with moving.1 = -1
       else if key == SDLK_DOWN then s with moving.1 = 1
+      else if key == SDLK_SPACE then s with paused = !s.paused
       else s
     case #keyup ->
       if key == SDLK_RIGHT then s with moving.2 = 0
@@ -50,7 +55,8 @@ module lys: lys with text_content = text_content = {
   let wheel _ y (s: state) = s with radius = i32.max 0 (s.radius + y)
 
   let step td (s: state) =
-    s with time = td + s.time with center = move s.center s.moving
+    s with time = s.time + (if s.paused then 0 else td)
+      with center = move s.center s.moving
 
   let render (s: state) =
     tabulate_2d (s.h) (s.w)
