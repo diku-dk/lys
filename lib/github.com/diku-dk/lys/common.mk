@@ -1,18 +1,27 @@
 PROGNAME?=lys
+LYS_BACKEND?=opencl
 PROG_FUT_DEPS?=$(shell futhark imports $(PROGNAME).fut)
 
 all: $(PROGNAME)
 
-NOWARN_CFLAGS=-std=c99 -O
-CFLAGS?=$(NOWARN_CFLAGS) -Wall -Wextra -pedantic
+NOWARN_CFLAGS=-std=c11 -O
+CFLAGS?=$(NOWARN_CFLAGS) -Wall -Wextra -pedantic -DLYS_BACKEND_$(LYS_BACKEND)
+BASE_LDFLAGS=-lm -lSDL2 -lSDL2_ttf
 
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
-OPENCLFLAGS?=-framework OpenCL
+OPENCL_LDFLAGS?=-framework OpenCL
 else
-OPENCLFLAGS?=-lOpenCL
+OPENCL_LDFLAGS?=-lOpenCL
 endif
-LDFLAGS?=$(OPENCLFLAGS) -lm -lSDL2 -lSDL2_ttf
+
+ifeq ($(LYS_BACKEND),opencl)
+LDFLAGS?=$(OPENCL_LDFLAGS) $(BASE_LDFLAGS)
+else ifeq ($(LYS_BACKEND),cuda)
+LDFLAGS?=$(BASE_LDFLAGS) -lcuda -lnvrtc
+else
+$(error Unknown LYS_BACKEND: $(LYS_BACKEND).  Must be 'opencl' or 'cuda')
+endif
 
 $(PROGNAME): $(PROGNAME)_wrapper.o $(PROGNAME)_printf.h lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/liblys.h
 	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME)_wrapper.h"' -DPRINTFHEADER='"$(PROGNAME)_printf.h"' $(PROGNAME)_wrapper.o -o $@ $(CFLAGS) $(LDFLAGS)
@@ -25,7 +34,7 @@ $(PROGNAME)_wrapper.o: $(PROGNAME)_wrapper.c
 	gcc -o $@ -c $< $(NOWARN_CFLAGS)
 
 %.c: %.fut lib
-	futhark opencl --library $<
+	futhark $(LYS_BACKEND) --library $<
 
 %_wrapper.fut: lib/github.com/diku-dk/lys/genlys.fut $(PROG_FUT_DEPS)
 	cat $< | sed 's/"lys"/"$(PROGNAME)"/' > $@

@@ -285,6 +285,7 @@ void create_futhark_context(const char *deviceopt,
   *ctx = futhark_context_new(*cfg);
   assert(*ctx != NULL);
 
+#ifdef LYS_BACKEND_opencl
   cl_device_id device;
   assert(clGetCommandQueueInfo(futhark_context_get_command_queue(*ctx),
                                CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL)
@@ -299,6 +300,7 @@ void create_futhark_context(const char *deviceopt,
 
   printf("Using OpenCL device: %s\n", dev_name);
   free(dev_name);
+#endif
 }
 
 int main(int argc, char** argv) {
@@ -312,7 +314,7 @@ int main(int argc, char** argv) {
     puts("  -w INT  Set the initial width of the window.");
     puts("  -h INT  Set the initial height of the window.");
     puts("  -R      Disallow resizing the window.");
-    puts("  -d DEV  Set the GPU device.");
+    puts("  -d DEV  Set the OpenCL device.");
     puts("  --help  Print this help and exit.");
     return 0;
   }
@@ -337,9 +339,11 @@ int main(int argc, char** argv) {
     case 'R':
       allow_resize = false;
       break;
+#ifdef LYS_BACKEND_opencl
     case 'd':
       deviceopt = optarg;
       break;
+#endif
     default:
       fprintf(stderr, "unknown option: %c\n", c);
       exit(EXIT_FAILURE);
