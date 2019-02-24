@@ -35,7 +35,8 @@ include lib/github.com/diku-dk/lys/common.mk
 ```
 
 then Lys will look for a Futhark program `spetakel.fut` and generate a
-binary named `spetakel`.
+binary named `spetakel`.  The file `spetakel.fut` should still define
+a module called `lys`, however.
 
 ## Requirements
 
