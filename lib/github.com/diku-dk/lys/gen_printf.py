@@ -25,6 +25,7 @@ with open(out_file, 'w') as f:
         print('  FUT_CHECK(ctx->fut, futhark_entry_text_content(ctx->fut, {}, render_milliseconds, ctx->state));'.format(', '.join('&' + v for v in out_vars)), file=f)
         print('  snprintf(dest, dest_len, format, {});'.format(', '.join(out_vars)), file=f)
     else:
-        for x in ['ctx', 'dest', 'dest_len', 'format', 'render_milliseconds']:
+        for x in ['ctx', 'render_milliseconds']:
             print('UNUSED({});'.format(x), file=f)
+        print('  snprintf(dest, dest_len, "%s", format);', file=f)
     print('}', file=f)
