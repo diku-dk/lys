@@ -23,8 +23,14 @@ else
 $(error Unknown LYS_BACKEND: $(LYS_BACKEND).  Must be 'opencl' or 'cuda')
 endif
 
+ifeq ($(shell test futhark.pkg -nt lib; echo $$?),0)
+$(PROGNAME):
+	futhark pkg sync
+	@make # The sync might have resulted in a new Makefile.
+else
 $(PROGNAME): $(PROGNAME)_wrapper.o $(PROGNAME)_printf.h lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/liblys.h
 	gcc lib/github.com/diku-dk/lys/liblys.c -I. -DPROGHEADER='"$(PROGNAME)_wrapper.h"' -DPRINTFHEADER='"$(PROGNAME)_printf.h"' $(PROGNAME)_wrapper.o -o $@ $(CFLAGS) $(LDFLAGS)
+endif
 
 $(PROGNAME)_printf.h: $(PROGNAME)_wrapper.c
 	python3 lib/github.com/diku-dk/lys/gen_printf.py $@ $<
@@ -33,7 +39,7 @@ $(PROGNAME)_printf.h: $(PROGNAME)_wrapper.c
 $(PROGNAME)_wrapper.o: $(PROGNAME)_wrapper.c
 	gcc -o $@ -c $< $(NOWARN_CFLAGS)
 
-%.c: %.fut lib
+%.c: %.fut
 	futhark $(LYS_BACKEND) --library $<
 
 %_wrapper.fut: lib/github.com/diku-dk/lys/genlys.fut $(PROG_FUT_DEPS)
