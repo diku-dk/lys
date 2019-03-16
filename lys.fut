@@ -17,6 +17,7 @@ module lys: lys with text_content = text_content = {
                 radius: i32,
                 paused: bool
                }
+  let grab_mouse = false
 
   let init (h: i32) (w: i32): state = {time = 0, w, h,
                                        center=(h/2,w/2),

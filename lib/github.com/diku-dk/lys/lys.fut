@@ -53,6 +53,12 @@ module type lys = {
   -- `resize`@term).
   val render : state -> [][]argb.colour
 
+  -- | If true, the program will grab the mouse, and all positions
+  -- reported via the `mouse`@term function will be relative to the
+  -- last time `mouse`@term was called.  If in doubt, leave this
+  -- `false`.
+  val grab_mouse : bool
+
   -- | Show helpful text in the upper-left corner.  Specify in printf format.
   val text_format : string
   -- | The content must be a scalar or a tuple of scalars.
@@ -87,6 +93,7 @@ module lys: lys_no_text = {
   let key _ _ s = s
   let mouse _ _ _ s = s
   let wheel _ _ s = s
+  let grab_mouse = false
   let render {h,w} = replicate w argb.black |> replicate h
   open lys_no_text
 }

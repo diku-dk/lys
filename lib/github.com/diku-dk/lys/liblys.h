@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <stdbool.h>
 
 struct lys_context {
   struct futhark_context *fut;
@@ -22,6 +23,7 @@ struct lys_context {
   char* text_buffer;
   size_t text_buffer_len;
   bool show_text;
+  bool grab_mouse;
 };
 
 #define FUT_CHECK(ctx, x) _fut_check(ctx, x, __FILE__, __LINE__)

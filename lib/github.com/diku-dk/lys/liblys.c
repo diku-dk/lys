@@ -95,11 +95,19 @@ void handle_sdl_events(struct lys_context *ctx) {
       ctx->running = 0;
       break;
     case SDL_MOUSEMOTION:
-      mouse_event(ctx, event.motion.state, event.motion.x, event.motion.y);
+      if (ctx->grab_mouse) {
+        mouse_event(ctx, event.motion.state, event.motion.xrel, event.motion.yrel);
+      } else {
+        mouse_event(ctx, event.motion.state, event.motion.x, event.motion.y);
+      }
       break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
-      mouse_event(ctx, 1<<(event.button.button-1), event.motion.x, event.motion.y);
+      if (ctx->grab_mouse) {
+        mouse_event(ctx, 1<<(event.button.button-1), event.motion.xrel, event.motion.yrel);
+      } else {
+        mouse_event(ctx, 1<<(event.button.button-1), event.motion.x, event.motion.y);
+      }
       break;
     case SDL_MOUSEWHEEL:
       wheel_event(ctx, event.wheel.x, event.wheel.y);
@@ -240,6 +248,10 @@ void do_sdl(struct futhark_context *fut, int height, int width,
   window_size_updated(&ctx, width, height);
 
   ctx.running = 1;
+  FUT_CHECK(ctx.fut, futhark_entry_grab_mouse(ctx.fut, &ctx.grab_mouse));
+  if (ctx.grab_mouse) {
+    assert(SDL_SetRelativeMouseMode(1) == 0);
+  }
 
   struct futhark_u8_1d *text_format_array;
   FUT_CHECK(ctx.fut, futhark_entry_text_format(ctx.fut, &text_format_array));
