@@ -24,6 +24,7 @@ struct lys_context {
   size_t text_buffer_len;
   bool show_text;
   bool grab_mouse;
+  bool mouse_grabbed;
 };
 
 #define FUT_CHECK(ctx, x) _fut_check(ctx, x, __FILE__, __LINE__)

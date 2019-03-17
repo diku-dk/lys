@@ -65,7 +65,7 @@ $ brew install sdl2 sdl2_gfx sdl2_image sdl2_ttf
 These keybindings are common for all lys programs and cannot be
 overridden:
 
-  + ESC: Exit the program.
+  + ESC: Exit the program, or escape mouse grabbing.
   + F1: Toggle showing text.
 
 ## Common command-line options
