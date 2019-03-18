@@ -7,9 +7,8 @@ let rotate_point (x: f32) (y: f32) (angle: f32) =
   let ynew = x * s + y * c
   in (xnew, ynew)
 
-type text_content = (f32, i32, i32, i32)
+type text_content = (i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
-  type text_content = (f32, i32, i32, i32)
   type state = {time: f32, h: i32, w: i32,
                 center: (i32, i32),
                 moving: (i32, i32),
@@ -66,10 +65,12 @@ module lys: lys with text_content = text_content = {
                    in if f32.sqrt (i'**2 + j'**2) < r32 s.radius then argb.white
                       else if i' > j' then argb.red else argb.blue)
 
-  let text_format = "Futhark render: %.2f ms\nCenter: (%d, %d)\nRadius: %d"
+  type text_content = text_content
+
+  let text_format = "FPS: %d\nCenter: (%d, %d)\nRadius: %d"
 
   let text_content (render_duration: f32) (s: state): text_content =
-    (render_duration, s.center.1, s.center.2, s.radius)
+    (t32 render_duration, s.center.1, s.center.2, s.radius)
 
   let text_colour = const argb.yellow
 }
