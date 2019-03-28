@@ -9,15 +9,14 @@ with specially defined entry points.
 
 ## Trying the Demo (assuming that you have git-cloned this repository)
 
-![Lys Window](/lys.png)
 Make sure that the requirements described below are satisfied. Then
 execute the commands:
-
 ```
 $ futhark pkg sync
 $ make
 $ ./lys
 ```
+![Lys Window](/lys.png)
 
 A window should now open and you should be able to navigate the white
 circle with the arrow keys.
