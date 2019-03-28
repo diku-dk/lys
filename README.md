@@ -7,7 +7,22 @@ rules to automatically generate a wrapper program in C that uses
 events, whose behaviour is controlled by calling a Futhark program
 with specially defined entry points.
 
-## Usage
+## Trying the Demo (assuming that you have git-cloned this repository)
+
+![Lys Window](/lys.png)
+Make sure that the requirements described below are satisfied. Then
+execute the commands:
+
+```
+$ futhark pkg sync
+$ make
+$ ./lys
+```
+
+A window should now open and you should be able to navigate the white
+circle with the arrow keys.
+
+## General Usage
 
 Download the package like any other Futhark package:
 
