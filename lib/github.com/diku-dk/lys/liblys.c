@@ -243,7 +243,7 @@ void do_sdl(struct futhark_context *fut,
 
   ctx.last_time = get_wall_time();
   ctx.fut = fut;
-  futhark_entry_init(fut, &ctx.state, height, width);
+  futhark_entry_init(fut, &ctx.state, (int32_t)get_wall_time(), height, width);
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
   SDL_ASSERT(TTF_Init() == 0);

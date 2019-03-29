@@ -18,13 +18,14 @@ module lys: lys with text_content = text_content = {
                }
   let grab_mouse = false
 
-  let init (h: i32) (w: i32): state = {time = 0, w, h,
-                                       center=(h/2,w/2),
-                                       moving = (0,0),
-                                       mouse = (0,0),
-                                       radius = 20,
-                                       paused = false
-                                      }
+  let init (seed: i32) (h: i32) (w: i32): state =
+    {time = 0, w, h,
+     center= (h/(1+seed%11), w/(1+seed%7)),
+     moving = (0,0),
+     mouse = (0,0),
+     radius = 20,
+     paused = false
+    }
 
   let resize (h: i32) (w: i32) (s: state) =
     s with h = h with w = w
