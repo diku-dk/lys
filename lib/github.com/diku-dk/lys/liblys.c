@@ -1,5 +1,7 @@
 // Convenience framework for writing visualisations with Futhark and
 // C/SDL.
+//
+// Based on initial SDL wrapper code by Jakob Stokholm Bertelsen.
 
 #define _XOPEN_SOURCE
 #include "liblys.h"
