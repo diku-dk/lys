@@ -235,6 +235,45 @@ void sdl_loop(struct lys_context *ctx) {
   }
 }
 
+void do_bench(struct futhark_context *fut, int height, int width, int n, const char *operation) {
+  struct futhark_opaque_state *state;
+  int64_t start, end;
+  FUT_CHECK(fut, futhark_entry_init(fut, &state, (int32_t)get_wall_time(), height, width));
+  futhark_context_sync(fut);
+  int do_step = 0, do_render = 0;
+
+  if (strstr(operation, "step") != NULL) {
+    do_step = 1;
+  }
+
+  if (strstr(operation, "render") != NULL) {
+    do_render = 1;
+  }
+
+  start = get_wall_time();
+  for (int i = 0; i < n; i++) {
+    if (do_step) {
+      struct futhark_opaque_state *new_state;
+      FUT_CHECK(fut, futhark_entry_step(fut, &new_state, 1.0/n, state));
+      futhark_free_opaque_state(fut, state);
+      state = new_state;
+    }
+    if (do_render) {
+      struct futhark_i32_2d *out_arr;
+      FUT_CHECK(fut, futhark_entry_render(fut, &out_arr, state));
+      FUT_CHECK(fut, futhark_free_i32_2d(fut, out_arr));
+    }
+  }
+  futhark_context_sync(fut);
+  end = get_wall_time();
+
+  printf("Rendered %d frames in %fs (%f FPS)\n",
+         n, ((double)end-start)/1000000,
+         n / (((double)end-start)/1000000));
+
+  FUT_CHECK(fut, futhark_free_opaque_state(fut, state));
+}
+
 void do_sdl(struct futhark_context *fut,
             int height, int width, int max_fps,
             bool allow_resize, char* font_path) {
@@ -340,6 +379,7 @@ int main(int argc, char** argv) {
   int width = INITIAL_WIDTH, height = INITIAL_HEIGHT, max_fps = 60;
   bool allow_resize = true;
   char *deviceopt = "";
+  char *benchopt = NULL;
 
   if (argc > 1 && strcmp(argv[1], "--help") == 0) {
     printf("Usage: %s options...\n", argv[0]);
@@ -354,7 +394,7 @@ int main(int argc, char** argv) {
   }
 
   int c;
-  while ( (c = getopt(argc, argv, "w:h:r:Rd:")) != -1) {
+  while ( (c = getopt(argc, argv, "w:h:r:Rd:b:")) != -1) {
     switch (c) {
     case 'w':
       width = atoi(optarg);
@@ -382,6 +422,15 @@ int main(int argc, char** argv) {
       break;
     case 'd':
       deviceopt = optarg;
+      break;
+    case 'b':
+      if (strcmp(optarg, "render") == 0 ||
+          strcmp(optarg, "step") == 0) {
+        benchopt = optarg;
+      } else {
+        fprintf(stderr, "Use -b <render|step>\n");
+        exit(EXIT_FAILURE);
+      }
       break;
     default:
       fprintf(stderr, "unknown option: %c\n", c);
@@ -411,7 +460,12 @@ int main(int argc, char** argv) {
   struct futhark_context* ctx;
 
   create_futhark_context(deviceopt, &cfg, &ctx);
-  do_sdl(ctx, height, width, max_fps, allow_resize, font_path);
+
+  if (benchopt != NULL) {
+    do_bench(ctx, height, width, max_fps, benchopt);
+  } else {
+    do_sdl(ctx, height, width, max_fps, allow_resize, font_path);
+  }
 
   free(font_path);
 
