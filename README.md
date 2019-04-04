@@ -93,3 +93,11 @@ By default, the build rules defined in
 You can change it to use Futhark's CUDA backend by setting
 `LYS_BACKEND=cuda`, either in the Makefile or as an environment
 variable.
+
+## Examples of programs using Lys
+
+* [Accelerate's ray tracer](https://github.com/diku-dk/futhark-benchmarks/tree/master/accelerate/ray)
+* [Ether](https://github.com/nqpz/ether)
+* [Functional Images](https://github.com/diku-dk/futhark-benchmarks/tree/master/misc/functional-images)
+* [Mandelbrot Explorer](https://github.com/diku-dk/futhark-benchmarks/tree/master/accelerate/mandelbrot)
+* [Tinykaboom in Futhark](https://github.com/athas/tinykaboom)
