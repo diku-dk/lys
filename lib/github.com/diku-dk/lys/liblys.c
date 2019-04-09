@@ -356,7 +356,9 @@ void create_futhark_context(const char *deviceopt,
   assert(*cfg != NULL);
 
 #if defined(LYS_BACKEND_opencl) || defined(LYS_BACKEND_cuda)
-  futhark_context_config_set_device(*cfg, deviceopt);
+  if (deviceopt != NULL) {
+    futhark_context_config_set_device(*cfg, deviceopt);
+  }
 #else
   (void)deviceopt;
 #endif
@@ -394,7 +396,7 @@ void create_futhark_context(const char *deviceopt,
 int main(int argc, char** argv) {
   int width = INITIAL_WIDTH, height = INITIAL_HEIGHT, max_fps = 60;
   bool allow_resize = true;
-  char *deviceopt = "";
+  char *deviceopt = NULL;
   char *benchopt = NULL;
   int interactive = 0;
 
