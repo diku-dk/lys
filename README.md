@@ -94,6 +94,11 @@ You can change it to use Futhark's CUDA backend by setting
 `LYS_BACKEND=cuda`, either in the Makefile or as an environment
 variable.
 
+## Using the sequential backend
+
+Set `LYS_BACKEND=c`.  Be aware that this is strictly single-threaded C
+with few optimisations.  It might be quite slow.
+
 ## Examples of programs using Lys
 
 * [Accelerate's ray tracer](https://github.com/diku-dk/futhark-benchmarks/tree/master/accelerate/ray)

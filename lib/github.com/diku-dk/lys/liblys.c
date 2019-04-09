@@ -354,12 +354,19 @@ void create_futhark_context(const char *deviceopt,
                             struct futhark_context **ctx) {
   *cfg = futhark_context_config_new();
   assert(*cfg != NULL);
+
+#if defined(LYS_BACKEND_opencl) || defined(LYS_BACKEND_cuda)
   futhark_context_config_set_device(*cfg, deviceopt);
+#else
+  (void)deviceopt;
+#endif
 
 #ifdef LYS_BACKEND_opencl
   if (interactive) {
     futhark_context_config_select_device_interactively(*cfg);
   }
+#else
+  (void)interactive;
 #endif
 
   *ctx = futhark_context_new(*cfg);
