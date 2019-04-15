@@ -74,6 +74,8 @@ On macOS with [Homebrew](https://brew.sh), run
 $ brew install sdl2 sdl2_gfx sdl2_image sdl2_ttf
 ```
 
+On Windows... well, if you know how, please tell us!
+
 ## Common keybindings
 
 These keybindings are common for all lys programs and cannot be
