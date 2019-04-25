@@ -108,3 +108,4 @@ with few optimisations.  It might be quite slow.
 * [Functional Images](https://github.com/diku-dk/futhark-benchmarks/tree/master/misc/functional-images)
 * [Mandelbrot Explorer](https://github.com/diku-dk/futhark-benchmarks/tree/master/accelerate/mandelbrot)
 * [Tinykaboom in Futhark](https://github.com/athas/tinykaboom)
+* [Fastcast](https://github.com/nqpz/fastcast)
