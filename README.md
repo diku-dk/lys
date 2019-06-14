@@ -109,3 +109,4 @@ with few optimisations.  It might be quite slow.
 * [Mandelbrot Explorer](https://github.com/diku-dk/futhark-benchmarks/tree/master/accelerate/mandelbrot)
 * [Tinykaboom in Futhark](https://github.com/athas/tinykaboom)
 * [Fastcast](https://github.com/nqpz/fastcast)
+* [Abelian Sandpile](https://github.com/athas/abelian-sandpile)
