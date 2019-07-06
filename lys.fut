@@ -30,34 +30,40 @@ module lys: lys with text_content = text_content = {
   let resize (h: i32) (w: i32) (s: state) =
     s with h = h with w = w
 
-  let key (e: key_event) (key: i32) (s: state) =
-    match e
-    case #keydown ->
-      if key == SDLK_RIGHT then s with moving.2 = 1
-      else if key == SDLK_LEFT then s with moving.2 = -1
-      else if key == SDLK_UP then s with moving.1 = -1
-      else if key == SDLK_DOWN then s with moving.1 = 1
-      else if key == SDLK_SPACE then s with paused = !s.paused
-      else s
-    case #keyup ->
-      if key == SDLK_RIGHT then s with moving.2 = 0
-      else if key == SDLK_LEFT then s with moving.2 = 0
-      else if key == SDLK_UP then s with moving.1 = 0
-      else if key == SDLK_DOWN then s with moving.1 = 0
-      else s
+  let keydown (key: i32) (s: state) =
+    if key == SDLK_RIGHT then s with moving.2 = 1
+    else if key == SDLK_LEFT then s with moving.2 = -1
+    else if key == SDLK_UP then s with moving.1 = -1
+    else if key == SDLK_DOWN then s with moving.1 = 1
+    else if key == SDLK_SPACE then s with paused = !s.paused
+    else s
+
+  let keyup (key: i32) (s: state) =
+    if key == SDLK_RIGHT then s with moving.2 = 0
+    else if key == SDLK_LEFT then s with moving.2 = 0
+    else if key == SDLK_UP then s with moving.1 = 0
+    else if key == SDLK_DOWN then s with moving.1 = 0
+    else s
 
   let move (x: i32, y: i32) (dx,dy) = (x+dx, y+dy)
   let diff (x1: i32, y1: i32) (x2, y2) = (x2 - x1, y2 - y1)
 
-  let mouse (mouse_state: i32) (x: i32) (y: i32) (s: state) =
-    s with mouse = (y,x) with center = if mouse_state != 0 then move s.center (diff s.mouse (y,x))
-                                       else s.center
-
-  let wheel _ y (s: state) = s with radius = i32.max 0 (s.radius + y)
-
-  let step td (s: state) =
-    s with time = s.time + (if s.paused then 0 else td)
-      with center = move s.center s.moving
+  let event (e: event) (s: state) =
+    match e
+    case (#step td) ->
+      s with time = s.time + (if s.paused then 0 else td)
+        with center = move s.center s.moving
+    case (#wheel {x, y}) ->
+      s with radius = i32.max 0 (s.radius + y)
+    case (#mouse {buttons, x, y}) ->
+      s with mouse = (y,x)
+        with center = if buttons != 0
+                      then move s.center (diff s.mouse (y,x))
+                      else s.center
+    case (#keydown {key}) ->
+      keydown key s
+    case (#keyup {key}) ->
+      keyup key s
 
   let render (s: state) =
     tabulate_2d (s.h) (s.w)
