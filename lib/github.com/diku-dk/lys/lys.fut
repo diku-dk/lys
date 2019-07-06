@@ -14,8 +14,8 @@
 -- | For convenience, re-export the colour module.
 open import "../../athas/matte/colour"
 
-type key_event = #keydown | #keyup
-
+-- | UTF-8 encoded string.  This is what is produced by string
+-- literals in Futhark code.
 type string = []u8
 
 -- | An event is sent when something has happened that might cause the
