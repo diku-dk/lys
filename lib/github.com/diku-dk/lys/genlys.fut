@@ -19,8 +19,8 @@ entry key (e: i32) (key: i32) (s: state): state =
 entry mouse (buttons: i32) (x: i32) (y: i32) (s: state): state =
   m.lys.event (#mouse {buttons, x, y}) s
 
-entry wheel (x: i32) (y: i32) (s: state): state =
-  m.lys.event (#wheel {x, y}) s
+entry wheel (dx: i32) (dy: i32) (s: state): state =
+  m.lys.event (#wheel {dx, dy}) s
 
 entry step (td: f32) (s: state): state =
   m.lys.event (#step td) s

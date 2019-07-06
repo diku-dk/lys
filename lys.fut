@@ -53,8 +53,8 @@ module lys: lys with text_content = text_content = {
     case #step td ->
       s with time = s.time + (if s.paused then 0 else td)
         with center = move s.center s.moving
-    case #wheel {x=_, y} ->
-      s with radius = i32.max 0 (s.radius + y)
+    case #wheel {dx=_, dy} ->
+      s with radius = i32.max 0 (s.radius + dy)
     case #mouse {buttons, x, y} ->
       s with mouse = (y,x)
         with center = if buttons != 0
