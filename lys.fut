@@ -50,19 +50,19 @@ module lys: lys with text_content = text_content = {
 
   let event (e: event) (s: state) =
     match e
-    case (#step td) ->
+    case #step td ->
       s with time = s.time + (if s.paused then 0 else td)
         with center = move s.center s.moving
-    case (#wheel {x, y}) ->
+    case #wheel {x=_, y} ->
       s with radius = i32.max 0 (s.radius + y)
-    case (#mouse {buttons, x, y}) ->
+    case #mouse {buttons, x, y} ->
       s with mouse = (y,x)
         with center = if buttons != 0
                       then move s.center (diff s.mouse (y,x))
                       else s.center
-    case (#keydown {key}) ->
+    case #keydown {key} ->
       keydown key s
-    case (#keyup {key}) ->
+    case #keyup {key} ->
       keyup key s
 
   let render (s: state) =
