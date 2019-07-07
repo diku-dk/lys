@@ -7,10 +7,11 @@ let rotate_point (x: f32) (y: f32) (angle: f32) =
   let ynew = x * s + y * c
   in (xnew, ynew)
 
-type text_content = (i32, i32, i32, i32)
+type text_content = (i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type state = {time: f32, h: i32, w: i32,
                 center: (i32, i32),
+                center_object: #circle | #square,
                 moving: (i32, i32),
                 mouse: (i32, i32),
                 radius: i32,
@@ -21,6 +22,7 @@ module lys: lys with text_content = text_content = {
   let init (seed: i32) (h: i32) (w: i32): state =
     {time = 0, w, h,
      center= (h/(1+seed%11), w/(1+seed%7)),
+     center_object = #circle,
      moving = (0,0),
      mouse = (0,0),
      radius = 20,
@@ -36,6 +38,8 @@ module lys: lys with text_content = text_content = {
     else if key == SDLK_UP then s with moving.1 = -1
     else if key == SDLK_DOWN then s with moving.1 = 1
     else if key == SDLK_SPACE then s with paused = !s.paused
+    else if key == SDLK_c then s with center_object = #circle
+    else if key == SDLK_s then s with center_object = #square
     else s
 
   let keyup (key: i32) (s: state) =
@@ -69,15 +73,22 @@ module lys: lys with text_content = text_content = {
     tabulate_2d (s.h) (s.w)
                 (\i j ->
                    let (i', j') = rotate_point (r32 (i-s.center.1)) (r32 (j-s.center.2)) s.time
-                   in if f32.sqrt (i'**2 + j'**2) < r32 s.radius then argb.white
+                   let r = r32 s.radius
+                   let inside = match s.center_object
+                                case #circle -> f32.sqrt (i'**2 + j'**2) < r32 s.radius
+                                case #square -> i' >= -r && i' < r && j' >= -r && j' < r
+                   in if inside then argb.white
                       else if i' > j' then argb.red else argb.blue)
 
   type text_content = text_content
 
-  let text_format = "FPS: %d\nCenter: (%d, %d)\nRadius: %d"
+  let text_format = "FPS: %d\nCenter: (%d, %d)\nCenter object: %[circle|square]\nRadius: %d"
 
   let text_content (render_duration: f32) (s: state): text_content =
-    (t32 render_duration, s.center.1, s.center.2, s.radius)
+    let center_object_id = match s.center_object
+                           case #circle -> 0
+                           case #square -> 1
+    in (t32 render_duration, s.center.1, s.center.2, center_object_id, s.radius)
 
   let text_colour = const argb.yellow
 }

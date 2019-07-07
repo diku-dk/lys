@@ -27,6 +27,7 @@ struct lys_context {
   bool mouse_grabbed;
   float fps;
   int max_fps;
+  char* **sum_names;
 };
 
 #define FUT_CHECK(ctx, x) _fut_check(ctx, x, __FILE__, __LINE__)

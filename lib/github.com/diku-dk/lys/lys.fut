@@ -77,7 +77,12 @@ module type lys = {
   -- `false`.
   val grab_mouse : bool
 
-  -- | Show helpful text in the upper-left corner.  Specify in printf format.
+  -- | Show helpful text in the upper-left corner.  Specify in printf format
+  -- with extensions: '%[string1|string2|...]' prints a string but takes an
+  -- index into the given list of strings, separated by '|'.  For example,
+  -- '%[circle|square]' prints 'circle' if passed the i32 value 0, and 'square'
+  -- if passed 1.
+
   val text_format : string
   -- | The content must be a scalar or a tuple of scalars.
   type text_content

@@ -176,7 +176,7 @@ void sdl_loop(struct lys_context *ctx) {
 
     if (ctx->show_text) {
       build_text(ctx, ctx->text_buffer, ctx->text_buffer_len, ctx->text_format,
-                 ctx->fps);
+                 ctx->fps, ctx->sum_names);
       if (*(ctx->text_buffer) != '\0') {
         uint32_t text_colour;
         FUT_CHECK(ctx->fut,
@@ -322,12 +322,64 @@ void do_sdl(struct futhark_context *fut,
   ctx.text_format[text_format_len] = '\0';
   FUT_CHECK(ctx.fut, futhark_free_u8_1d(ctx.fut, text_format_array));
 
+  ctx.sum_names = (char* **) malloc(sizeof(char* *) * n_printf_arguments());
+  assert(ctx.sum_names != NULL);
+
   ctx.text_buffer_len = text_format_len;
+  size_t i_arg = -1;
   for (size_t i = 0; i < text_format_len; i++) {
-    if (ctx.text_format[i] == '%') {
-      ctx.text_buffer_len += 20; // estimate
+    if (ctx.text_format[i] == '%' &&
+        i + 1 < text_format_len && ctx.text_format[i + 1] != '%') {
+      i_arg++;
+      if (ctx.text_format[i + 1] == '[') {
+        ctx.text_format[i + 1] = 's';
+        size_t end_pos;
+        size_t n_choices = 1;
+        bool found_end = false;
+        for (end_pos = i + 2; end_pos < text_format_len; end_pos++) {
+          if (ctx.text_format[end_pos] == '|') {
+            n_choices++;
+          } else if (ctx.text_format[end_pos] == ']') {
+            found_end = true;
+            break;
+          }
+        }
+        assert(found_end);
+        ctx.sum_names[i_arg] = (char* *) malloc(sizeof(char*) * (n_choices + 1));
+        assert(ctx.sum_names[i_arg] != NULL);
+        ctx.sum_names[i_arg][n_choices] = NULL;
+        char* temp_choice = (char*) malloc(sizeof(char) * (end_pos - i - n_choices));
+        assert(temp_choice != NULL);
+        size_t choice_cur = 0;
+        size_t i_choice = 0;
+        for (size_t j = i + 2; j < end_pos + 1; j++) {
+          if (ctx.text_format[j] == '|' || ctx.text_format[j] == ']') {
+            temp_choice[choice_cur] = '\0';
+            ctx.sum_names[i_arg][i_choice] = (char*) malloc(sizeof(char) * (choice_cur + 1));
+            assert(ctx.sum_names[i_arg][i_choice] != NULL);
+            strncpy(ctx.sum_names[i_arg][i_choice], temp_choice, choice_cur + 1);
+            choice_cur = 0;
+            i_choice++;
+          } else {
+            temp_choice[choice_cur] = ctx.text_format[j];
+            choice_cur++;
+          }
+        }
+        free(temp_choice);
+        size_t shift_left = end_pos - i - 1;
+        for (size_t j = end_pos + 1; j < text_format_len; j++) {
+          ctx.text_format[j - shift_left] = ctx.text_format[j];
+        }
+        text_format_len -= shift_left;
+        ctx.text_format[text_format_len] = '\0';
+        i++;
+      } else {
+        ctx.sum_names[i_arg] = NULL;
+        ctx.text_buffer_len += 20; // estimate
+      }
     }
   }
+
   ctx.text_buffer = malloc(sizeof(char) * ctx.text_buffer_len);
   assert(ctx.text_buffer != NULL);
   ctx.text_buffer[0] = '\0';
@@ -339,6 +391,18 @@ void do_sdl(struct futhark_context *fut,
 
   free(ctx.text_format);
   free(ctx.text_buffer);
+
+  for (size_t i = 0; i < n_printf_arguments(); i++) {
+    if (ctx.sum_names[i] != NULL) {
+      size_t j = 0;
+      while (ctx.sum_names[i][j] != NULL) {
+        free(ctx.sum_names[i][j]);
+        j++;
+      }
+      free(ctx.sum_names[i]);
+    }
+  }
+  free(ctx.sum_names);
 
   free(ctx.data);
   SDL_FreeSurface(ctx.surface);

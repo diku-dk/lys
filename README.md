@@ -19,7 +19,9 @@ $ ./lys
 ![Lys Window](/lys.png)
 
 A window should now open and you should be able to navigate the white
-circle with the arrow keys.
+object with the arrow keys and the mouse.  Change object to a square by
+pressing `s`, and back to a circle by pressing `c`.  Exit by pressing
+ESC.
 
 ## General Usage
 
