@@ -26,9 +26,9 @@ with open(out_file, 'w') as f:
         print('  FUT_CHECK(ctx->fut, futhark_entry_text_content(ctx->fut, {}, render_milliseconds, ctx->state));'.format(', '.join('&{}.val'.format(v) for v in out_vars)), file=f)
         for v, i in zip(out_vars, range(len(out_vars))):
             print('  if (sum_names[{}] != NULL) {{'.format(i), file=f)
-            print('    {v}.sum_name = sum_names[{i}][{v}.val];'.format(v=v, i=i), file=f)
+            print('    {v}.sum_name = sum_names[{i}][(int32_t) {v}.val];'.format(v=v, i=i), file=f)
             print('  }', file=f)
-        print('  snprintf(dest, dest_len, format, {});'.format(', '.join((s + '.sum_name') for s in out_vars)), file=f)
+        print('  snprintf(dest, dest_len, format, {});'.format(', '.join((s + ('.sum_name' if t == 'int32_t' else '.val')) for s, t in zip(out_vars, types))), file=f)
     else:
         for x in ['ctx', 'render_milliseconds']:
             print('UNUSED({});'.format(x), file=f)
