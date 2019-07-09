@@ -30,7 +30,7 @@ with open(out_file, 'w') as f:
             print('  }', file=f)
         print('  snprintf(dest, dest_len, format, {});'.format(', '.join((s + ('.sum_name' if t == 'int32_t' else '.val')) for s, t in zip(out_vars, types))), file=f)
     else:
-        for x in ['ctx', 'render_milliseconds']:
+        for x in ['ctx', 'render_milliseconds', 'sum_names']:
             print('UNUSED({});'.format(x), file=f)
         print('  snprintf(dest, dest_len, "%s", format);', file=f)
     print('}', file=f)
