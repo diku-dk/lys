@@ -198,7 +198,6 @@ void sdl_loop(struct lys_context *ctx) {
 
           bool no_more_text = false;
           while (true) {
-            buffer++;
             if (*buffer == '\n') {
               *buffer = '\0';
               break;
@@ -206,9 +205,10 @@ void sdl_loop(struct lys_context *ctx) {
               no_more_text = true;
               break;
             }
+            buffer++;
           }
 
-          if (!*buffer_start == '\0') {
+          if (*buffer_start != '\0') {
             text_surface = TTF_RenderUTF8_Blended(ctx->font, buffer_start, sdl_text_colour);
             SDL_ASSERT(text_surface != NULL);
             offset_rect.y = y;
