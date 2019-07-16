@@ -208,14 +208,16 @@ void sdl_loop(struct lys_context *ctx) {
             }
           }
 
-          text_surface = TTF_RenderUTF8_Blended(ctx->font, buffer_start, sdl_text_colour);
-          SDL_ASSERT(text_surface != NULL);
-          offset_rect.y = y;
-          offset_rect.w = text_surface->w;
-          offset_rect.h = text_surface->h;
-          SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
-                                     ctx->wnd_surface, &offset_rect) == 0);
-          SDL_FreeSurface(text_surface);
+          if (!*buffer_start == '\0') {
+            text_surface = TTF_RenderUTF8_Blended(ctx->font, buffer_start, sdl_text_colour);
+            SDL_ASSERT(text_surface != NULL);
+            offset_rect.y = y;
+            offset_rect.w = text_surface->w;
+            offset_rect.h = text_surface->h;
+            SDL_ASSERT(SDL_BlitSurface(text_surface, NULL,
+                                       ctx->wnd_surface, &offset_rect) == 0);
+            SDL_FreeSurface(text_surface);
+          }
 
           if (no_more_text) {
             break;
