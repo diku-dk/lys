@@ -15,7 +15,6 @@
 
 #define INITIAL_WIDTH 800
 #define INITIAL_HEIGHT 600
-#define FONT_SIZE 24
 
 #define SDL_ASSERT(x) _sdl_assert(x, __FILE__, __LINE__)
 static inline void _sdl_assert(int res, const char *file, int line) {
@@ -32,6 +31,22 @@ static int64_t get_wall_time(void) {
   return time.tv_sec * 1000000 + time.tv_usec;
 }
 
+static int font_size_from_dimensions(int width, int height) {
+  int size, font_size;
+  if (height < width) {
+    size = height;
+  } else {
+    size = width;
+  }
+  font_size = size / 45;
+  if (font_size < 14) {
+    font_size = 14;
+  } else if (font_size > 32) {
+    font_size = 32;
+  }
+  return font_size;
+}
+
 void window_size_updated(struct lys_context *ctx, int newx, int newy) {
   // https://stackoverflow.com/a/40122002
   ctx->wnd_surface = SDL_GetWindowSurface(ctx->wnd);
@@ -39,6 +54,11 @@ void window_size_updated(struct lys_context *ctx, int newx, int newy) {
 
   ctx->width = newx;
   ctx->height = newy;
+
+  ctx->font_size = font_size_from_dimensions(ctx->width, ctx->height);
+  TTF_CloseFont(ctx->font);
+  ctx->font = TTF_OpenFont(ctx->font_path, ctx->font_size);
+  SDL_ASSERT(ctx->font != NULL);
 
   struct futhark_opaque_state *new_state;
   FUT_CHECK(ctx->fut, futhark_entry_resize(ctx->fut, &new_state, ctx->height, ctx->width, ctx->state));
@@ -223,7 +243,7 @@ void sdl_loop(struct lys_context *ctx) {
             break;
           } else {
             buffer++;
-            y += FONT_SIZE;
+            y += ctx->font_size;
           }
         }
       }
@@ -291,7 +311,9 @@ void do_sdl(struct futhark_context *fut,
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
   SDL_ASSERT(TTF_Init() == 0);
 
-  ctx.font = TTF_OpenFont(font_path, FONT_SIZE);
+  ctx.font_path = font_path;
+  ctx.font_size = font_size_from_dimensions(ctx.width, ctx.height);
+  ctx.font = TTF_OpenFont(ctx.font_path, ctx.font_size);
   SDL_ASSERT(ctx.font != NULL);
 
   int flags = 0;
