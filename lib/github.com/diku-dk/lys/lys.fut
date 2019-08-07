@@ -56,7 +56,7 @@ module type lys = {
   -- | Initial state for a given window size.  A random seed is passed
   -- in.  Don't treat this as a true random number (it's currently
   -- just a timestamp), but use it for initialising a proper RNG.
-  val init : (seed: i32) -> (h: i32) -> (w: i32) -> state
+  val init : (seed: u32) -> (h: i32) -> (w: i32) -> state
 
   -- | An event occured.  It is permissible to ignore any of these
   -- events by returning the same state unchanged.
