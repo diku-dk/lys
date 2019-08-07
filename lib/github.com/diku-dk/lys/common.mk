@@ -1,6 +1,6 @@
 PROGNAME?=lys
 LYS_BACKEND?=opencl
-PROG_FUT_DEPS=$(shell futhark imports $(PROGNAME).fut)
+PROG_FUT_DEPS:=$(shell ls *.fut; find lib -name \*.fut)
 
 all: $(PROGNAME)
 
