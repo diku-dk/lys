@@ -13,7 +13,7 @@ OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
 OPENCL_LDFLAGS?=-framework OpenCL -framework OpenGL
 else
-OPENCL_LDFLAGS?=-lOpenCL
+OPENCL_LDFLAGS?=-lOpenCL -lOpenGL
 endif
 
 ifeq ($(LYS_BACKEND),opencl)

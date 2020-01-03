@@ -488,7 +488,9 @@ void create_futhark_context(const char *deviceopt,
 #else
   // CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE is called something
   // else on Linux.
-  assert(0);
+  cl_context_properties properties[] =
+    { CL_GL_CONTEXT_KHR, (cl_context_properties) SDL_GL_GetCurrentContext(),
+      0};
 #endif
 
   cl_context cl_ctx = clCreateContext(properties,
