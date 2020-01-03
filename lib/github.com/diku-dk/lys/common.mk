@@ -11,7 +11,7 @@ BASE_LDFLAGS=-lm -lSDL2 -lSDL2_ttf
 
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
-OPENCL_LDFLAGS?=-framework OpenCL
+OPENCL_LDFLAGS?=-framework OpenCL -framework OpenGL
 else
 OPENCL_LDFLAGS?=-lOpenCL
 endif

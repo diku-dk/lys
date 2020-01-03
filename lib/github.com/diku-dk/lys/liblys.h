@@ -30,6 +30,7 @@ struct lys_context {
   float fps;
   int max_fps;
   char* **sum_names;
+  SDL_GLContext gl;
 };
 
 #define FUT_CHECK(ctx, x) _fut_check(ctx, x, __FILE__, __LINE__)

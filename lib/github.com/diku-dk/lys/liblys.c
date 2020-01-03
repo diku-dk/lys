@@ -13,6 +13,29 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#include <OpenGL/gl.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/CGLDevice.h>
+#include <OpenGL/CGLCurrent.h>
+#else
+#include <GL/gl.h>
+#endif
+
+#ifdef __APPLE__
+#define CL_SILENCE_DEPRECATION
+#include <OpenCL/cl.h>
+#include <OpenCL/cl_gl.h>
+#include <OpenCL/cl_gl_ext.h>
+#else
+#include <CL/cl.h>
+#include <CL/cl_gl.h>
+#include <CL/cl_gl_ext.h>
+#endif
+
 #define INITIAL_WIDTH 800
 #define INITIAL_HEIGHT 600
 
@@ -178,6 +201,31 @@ void handle_sdl_events(struct lys_context *ctx) {
 void sdl_loop(struct lys_context *ctx) {
   struct futhark_i32_2d *out_arr;
 
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, ctx->width, ctx->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  assert(glGetError() == GL_NO_ERROR);
+
+  cl_command_queue cq = futhark_context_get_command_queue(ctx->fut);
+  cl_context cl_ctx;
+  clGetCommandQueueInfo(cq, CL_QUEUE_CONTEXT, sizeof(cl_ctx), &cl_ctx, NULL);
+
+  cl_int cl_err = CL_SUCCESS;
+  cl_mem cl_img = clCreateFromGLTexture(cl_ctx,
+                                        CL_MEM_WRITE_ONLY,
+                                        GL_TEXTURE_2D,
+                                        0,
+                                        texture,
+                                        &cl_err);
+  assert(cl_err == CL_SUCCESS);
+
   while (ctx->running) {
     int64_t now = get_wall_time();
     float delta = ((float)(now - ctx->last_time))/1000000;
@@ -193,6 +241,11 @@ void sdl_loop(struct lys_context *ctx) {
     FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, out_arr));
 
     SDL_ASSERT(SDL_BlitSurface(ctx->surface, NULL, ctx->wnd_surface, NULL)==0);
+
+    glViewport(0, 0, ctx->width, ctx->height);
+    glClearColor(1.f, 0.f, 1.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SwapWindow(ctx->wnd);
 
     if (ctx->show_text) {
       build_text(ctx, ctx->text_buffer, ctx->text_buffer_len, ctx->text_format,
@@ -249,7 +302,7 @@ void sdl_loop(struct lys_context *ctx) {
       }
     }
 
-    SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
+    //SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
 
     SDL_Delay((int) (1000.0 / ctx->max_fps - delta / 1000));
 
@@ -302,16 +355,6 @@ void do_sdl(struct lys_context *ctx,
 
   ctx->last_time = get_wall_time();
   futhark_entry_init(fut, &ctx->state, (int32_t)get_wall_time(), ctx->height, ctx->width);
-
-  int flags = 0;
-  if (allow_resize) {
-    flags |= SDL_WINDOW_RESIZABLE;
-  }
-  ctx->wnd =
-    SDL_CreateWindow("Lys",
-                     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                     ctx->width, ctx->height, flags);
-  SDL_ASSERT(ctx->wnd != NULL);
 
   window_size_updated(ctx, ctx->width, ctx->height);
 
@@ -418,6 +461,7 @@ void do_sdl(struct lys_context *ctx,
   free(ctx->data);
   SDL_FreeSurface(ctx->surface);
   TTF_CloseFont(ctx->font);
+  SDL_GL_DeleteContext(ctx->gl);
   // do not free wnd_surface (see SDL_GetWindowSurface)
   SDL_DestroyWindow(ctx->wnd);
   SDL_Quit();
@@ -430,45 +474,54 @@ void create_futhark_context(const char *deviceopt,
   *cfg = futhark_context_config_new();
   assert(*cfg != NULL);
 
-#if defined(LYS_BACKEND_opencl) || defined(LYS_BACKEND_cuda)
-  if (deviceopt != NULL) {
-    futhark_context_config_set_device(*cfg, deviceopt);
-  }
+  cl_int err;
+
+#ifdef __APPLE__
+  CGLContextObj     kCGLContext     = CGLGetCurrentContext();
+  CGLShareGroupObj  kCGLShareGroup  = CGLGetShareGroup(kCGLContext);
+
+  cl_context_properties properties[] =
+    { CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+      (cl_context_properties) kCGLShareGroup,
+      0
+    };
 #else
-  (void)deviceopt;
+  // CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE is called something
+  // else on Linux.
+  assert(0);
 #endif
 
-#ifdef LYS_BACKEND_opencl
-  if (interactive) {
-    futhark_context_config_select_device_interactively(*cfg);
-  }
-#else
-  (void)interactive;
-#endif
+  cl_context cl_ctx = clCreateContext(properties,
+                                      0, NULL,
+                                      NULL, NULL, &err);
+  assert(err == CL_SUCCESS);
 
-  *ctx = futhark_context_new(*cfg);
-  assert(*ctx != NULL);
-
-#ifdef LYS_BACKEND_opencl
   cl_device_id device;
-  assert(clGetCommandQueueInfo(futhark_context_get_command_queue(*ctx),
-                               CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL)
-         == CL_SUCCESS);
+  err = clGetContextInfo(cl_ctx, CL_CONTEXT_DEVICES, sizeof(cl_device_id), &device, NULL);
+  assert(err == CL_SUCCESS);
 
-  size_t dev_name_size;
-  assert(clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &dev_name_size)
-         == CL_SUCCESS);
-  char *dev_name = malloc(dev_name_size);
-  assert(clGetDeviceInfo(device, CL_DEVICE_NAME, dev_name_size, dev_name, NULL)
-         == CL_SUCCESS);
+  size_t name_size;
+  err = clGetDeviceInfo(device,
+                        CL_DEVICE_NAME,
+                        0, NULL, &name_size);
+  assert(err == CL_SUCCESS);
 
-  printf("Using OpenCL device: %s\n", dev_name);
-  printf("Use -d or -i to change this.\n");
-  free(dev_name);
-#endif
+  char device_name[name_size]; // Yes yes, VLAs are bad.
+  err = clGetDeviceInfo(device,
+                        CL_DEVICE_NAME,
+                        name_size, device_name, NULL);
+  assert(err == CL_SUCCESS);
+
+  printf("Device used for rendering and computation: %s\n", device_name);
+
+  cl_command_queue cq = clCreateCommandQueue(cl_ctx, device, 0, &err);
+  assert(err == CL_SUCCESS);
+
+  *ctx = futhark_context_new_with_command_queue(*cfg, cq);
+  assert(*ctx != NULL);
 }
 
-void init_sdl(struct lys_context *ctx, char* font_path) {
+void init_sdl(struct lys_context *ctx, char* font_path, int allow_resize) {
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
   SDL_ASSERT(TTF_Init() == 0);
 
@@ -476,6 +529,18 @@ void init_sdl(struct lys_context *ctx, char* font_path) {
   ctx->font_size = font_size_from_dimensions(ctx->width, ctx->height);
   ctx->font = TTF_OpenFont(ctx->font_path, ctx->font_size);
   SDL_ASSERT(ctx->font != NULL);
+
+  int flags = SDL_WINDOW_OPENGL;
+  if (allow_resize) {
+    flags |= SDL_WINDOW_RESIZABLE;
+  }
+  ctx->wnd =
+    SDL_CreateWindow("Lys",
+                     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                     ctx->width, ctx->height, flags);
+  SDL_ASSERT(ctx->wnd != NULL);
+
+  ctx->gl = SDL_GL_CreateContext(ctx->wnd);
 }
 
 int main(int argc, char** argv) {
@@ -570,13 +635,12 @@ int main(int argc, char** argv) {
   ctx.height = height;
   ctx.fps = 0;
   ctx.max_fps = max_fps;
-  init_sdl(&ctx, font_path);
+  init_sdl(&ctx, font_path, allow_resize);
 
   struct futhark_context_config* futcfg;
   struct futhark_context* futctx;
   create_futhark_context(deviceopt, interactive, &futcfg, &futctx);
   ctx.fut = futctx;
-
 
   if (benchopt != NULL) {
     do_bench(futctx, height, width, max_fps, benchopt);
