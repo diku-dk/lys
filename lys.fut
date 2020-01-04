@@ -82,7 +82,8 @@ module lys: lys with text_content = text_content = {
 
   type text_content = text_content
 
-  let text_format = "FPS: %d\nCenter: (%d, %d)\nCenter object: %[circle|square]\nRadius: %d"
+  let text_format () =
+    "FPS: %d\nCenter: (%d, %d)\nCenter object: %[circle|square]\nRadius: %d"
 
   let text_content (render_duration: f32) (s: state): text_content =
     let center_object_id = match s.center_object
