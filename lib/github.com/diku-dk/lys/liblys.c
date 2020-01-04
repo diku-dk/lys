@@ -23,6 +23,7 @@
 #include <OpenGL/CGLCurrent.h>
 #else
 #include <GL/gl.h>
+#include <GL/glx.h>
 #endif
 
 #ifdef __APPLE__
@@ -486,16 +487,19 @@ void create_futhark_context(const char *deviceopt,
       0
     };
 #else
-  // CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE is called something
-  // else on Linux.
+  cl_platform_id platform;
+  err = clGetPlatformIDs(1, &platform, NULL);
+  assert(err == CL_SUCCESS);
+
   cl_context_properties properties[] =
-    { CL_GL_CONTEXT_KHR, (cl_context_properties) SDL_GL_GetCurrentContext(),
+    { CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
+      CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
+      CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
       0};
 #endif
 
-  cl_context cl_ctx = clCreateContext(properties,
-                                      0, NULL,
-                                      NULL, NULL, &err);
+  cl_context cl_ctx = clCreateContextFromType(properties, CL_DEVICE_TYPE_GPU,
+                                              NULL, NULL, &err);
   assert(err == CL_SUCCESS);
 
   cl_device_id device;
