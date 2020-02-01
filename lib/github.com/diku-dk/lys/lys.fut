@@ -16,7 +16,7 @@ open import "../../athas/matte/colour"
 
 -- | UTF-8 encoded string.  This is what is produced by string
 -- literals in Futhark code.
-type string = []u8
+type string [n] = [n]u8
 
 -- | An event is sent when something has happened that might cause the
 -- state of the program to change, or just when some time has passed.
@@ -51,7 +51,7 @@ type event = #step f32
 module type lys = {
   -- | The state maintained by this Lys application.  Most functions
   -- will take the current state and return a new state.
-  type state
+  type~ state
 
   -- | Initial state for a given window size.  A random seed is passed
   -- in.  Don't treat this as a true random number (it's currently
@@ -83,7 +83,7 @@ module type lys = {
   -- '%[circle|square]' prints 'circle' if passed the i32 value 0, and 'square'
   -- if passed 1.
 
-  val text_format : string
+  val text_format : () -> string []
   -- | The content must be a scalar or a tuple of scalars.
   type text_content
   val text_content : (fps: f32) -> state -> text_content
@@ -100,7 +100,7 @@ module type lys_no_text = lys with text_content = ()
 -- | A convenience module that can be `open`ed to give dummy
 -- definitions for the text-related functionality.
 module lys_no_text = {
-  let text_format = ""
+  let text_format () = ""
   type text_content = ()
   let text_content _ _ = ()
   let text_colour _ = argb.black
