@@ -117,3 +117,4 @@ with few optimisations.  It might be quite slow.
 * [Fastcast](https://github.com/nqpz/fastcast)
 * [Abelian Sandpile](https://github.com/athas/abelian-sandpile)
 * [futswirl](https://github.com/nqpz/futswirl)
+* [stupidart](https://github.com/nqpz/stupidart) (uses Lys as a library)
