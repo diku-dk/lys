@@ -1,6 +1,7 @@
 #include "liblys.h"
 #include PRINTFHEADER
 
+#define _XOPEN_SOURCE
 #include <unistd.h>
 
 #define INITIAL_WIDTH 800
