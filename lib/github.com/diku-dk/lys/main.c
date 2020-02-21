@@ -228,6 +228,7 @@ int main(int argc, char** argv) {
     puts("  -d DEV  Set the computation device.");
     puts("  -r INT  Maximum frames per second.");
     puts("  -i      Select execution device interactively.");
+    puts("  -b <render|step>  Benchmark program.");
     puts("  --help  Print this help and exit.");
     return 0;
   }
