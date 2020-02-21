@@ -4,7 +4,6 @@
 #define _XOPEN_SOURCE
 #define _GNU_SOURCE
 #include <unistd.h>
-#include <getopt.h>
 
 #define INITIAL_WIDTH 800
 #define INITIAL_HEIGHT 600
