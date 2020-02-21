@@ -1,8 +1,10 @@
 #include "liblys.h"
 #include PRINTFHEADER
 
-#define _POSIX_C_SOURCE 2
+#define _XOPEN_SOURCE
+#define _GNU_SOURCE
 #include <unistd.h>
+#include <getopt.h>
 
 #define INITIAL_WIDTH 800
 #define INITIAL_HEIGHT 600
