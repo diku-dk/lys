@@ -199,7 +199,6 @@ void lys_run_sdl(struct lys_context *ctx) {
 
   trigger_event(ctx, LYS_LOOP_END);
 
-  free(ctx->data);
   SDL_FreeSurface(ctx->surface);
   // do not free wnd_surface (see SDL_GetWindowSurface)
   SDL_DestroyWindow(ctx->wnd);

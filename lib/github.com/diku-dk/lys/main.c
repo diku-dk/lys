@@ -329,6 +329,7 @@ int main(int argc, char** argv) {
     futhark_entry_init(ctx.fut, &ctx.state,
                        seed, ctx.height, ctx.width);
     lys_run_sdl(&ctx);
+    free(ctx.data);
   }
 
   TTF_CloseFont(text.font);
