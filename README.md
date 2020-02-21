@@ -54,6 +54,11 @@ then Lys will look for a Futhark program `spetakel.fut` and generate a
 binary named `spetakel`.  The file `spetakel.fut` should still define
 a module called `lys`, however.
 
+It is also possible to use Lys as a general library, in which case you
+write both the Futhark file and the corresponding C file.  This gives
+you more flexibility in how you use the built-in text overlay and how
+you initialise Lys' state, but keeps the default event-render SDL loop.
+
 ## Requirements
 
 Lys is written in C, and requires a working C compiler and the SDL2
@@ -80,8 +85,7 @@ On Windows... well, if you know how, please tell us!
 
 ## Common keybindings
 
-These keybindings are common for all lys programs and cannot be
-overridden:
+These keybindings are common for all lys programs:
 
   + ESC: Exit the program, or escape mouse grabbing.
   + F1: Toggle showing text.
