@@ -2,7 +2,6 @@
 #include PRINTFHEADER
 
 #define _XOPEN_SOURCE
-#define _GNU_SOURCE
 #include <unistd.h>
 #include <getopt.h>
 
