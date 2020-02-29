@@ -306,8 +306,18 @@ int main(int argc, char** argv) {
   }
 
   struct lys_context ctx;
-  lys_setup(&ctx, width, height, max_fps,
-            deviceopt, device_interactive, sdl_flags);
+  struct futhark_context_config *futcfg;
+  lys_setup(&ctx, width, height, max_fps, sdl_flags);
+
+  char* opencl_device_name = NULL;
+  lys_setup_futhark_context(deviceopt, device_interactive,
+                            &futcfg, &ctx.fut, &opencl_device_name);
+  if (opencl_device_name != NULL) {
+    printf("Using OpenCL device: %s\n", opencl_device_name);
+    printf("Use -d or -i to change this.\n");
+    free(opencl_device_name);
+  }
+
   FUT_CHECK(ctx.fut, futhark_entry_grab_mouse(ctx.fut, &ctx.grab_mouse));
 
   struct lys_text text;
@@ -335,7 +345,7 @@ int main(int argc, char** argv) {
   free(font_path);
 
   futhark_context_free(ctx.fut);
-  futhark_context_config_free(ctx.futcfg);
+  futhark_context_config_free(futcfg);
 
   return EXIT_SUCCESS;
 }

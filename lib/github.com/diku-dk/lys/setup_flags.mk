@@ -23,19 +23,18 @@ ifeq ($(LYS_TTF),1)
 CFLAGS+= -DLYS_TTF
 endif
 
+ifeq ($(LYS_BACKEND),opencl)
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
-OPENCL_LDFLAGS?=-framework OpenCL
+DEVICE_LDFLAGS=-framework OpenCL
 else
-OPENCL_LDFLAGS?=-lOpenCL
+DEVICE_LDFLAGS=-lOpenCL
 endif
-
-ifeq ($(LYS_BACKEND),opencl)
-LDFLAGS?=$(OPENCL_LDFLAGS) $(BASE_LDFLAGS)
 else ifeq ($(LYS_BACKEND),cuda)
-LDFLAGS?=$(BASE_LDFLAGS) -lcuda -lnvrtc
+DEVICE_LDFLAGS=-lcuda -lnvrtc
 else ifeq ($(LYS_BACKEND),c)
-LDFLAGS?=$(BASE_LDFLAGS)
+DEVICE_LDFLAGS=
 else
 $(error Unknown LYS_BACKEND: $(LYS_BACKEND).  Must be 'opencl', 'cuda', or 'c')
 endif
+LDFLAGS?=$(BASE_LDFLAGS) $(DEVICE_LDFLAGS)

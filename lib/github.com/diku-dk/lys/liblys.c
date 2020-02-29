@@ -6,12 +6,6 @@
 #include "liblys.h"
 
 
-int64_t lys_wall_time() {
-  struct timeval time;
-  assert(gettimeofday(&time,NULL) == 0);
-  return time.tv_sec * 1000000 + time.tv_usec;
-}
-
 static void trigger_event(struct lys_context *ctx, enum lys_event event) {
   ctx->event_handler(ctx, event);
 }
@@ -205,59 +199,13 @@ void lys_run_sdl(struct lys_context *ctx) {
   SDL_Quit();
 }
 
-void lys_setup(struct lys_context *ctx, int width, int height, int max_fps,
-               const char *deviceopt, bool device_interactive, int sdl_flags) {
+void lys_setup(struct lys_context *ctx, int width, int height, int max_fps, int sdl_flags) {
   memset(ctx, 0, sizeof(struct lys_context));
   ctx->width = width;
   ctx->height = height;
   ctx->fps = 0;
   ctx->max_fps = max_fps;
   ctx->sdl_flags = sdl_flags;
-
-  struct futhark_context_config *futcfg;
-  struct futhark_context *futctx;
-  futcfg = futhark_context_config_new();
-  assert(futcfg != NULL);
-
-#if defined(LYS_BACKEND_opencl) || defined(LYS_BACKEND_cuda)
-  if (deviceopt != NULL) {
-    futhark_context_config_set_device(futcfg, deviceopt);
-  }
-#else
-  (void)deviceopt;
-#endif
-
-#ifdef LYS_BACKEND_opencl
-  if (device_interactive) {
-    futhark_context_config_select_device_interactively(futcfg);
-  }
-#else
-  (void)device_interactive;
-#endif
-
-  futctx = futhark_context_new(futcfg);
-  assert(futctx != NULL);
-
-#ifdef LYS_BACKEND_opencl
-  cl_device_id device;
-  assert(clGetCommandQueueInfo(futhark_context_get_command_queue(futctx),
-                               CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL)
-         == CL_SUCCESS);
-
-  size_t dev_name_size;
-  assert(clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &dev_name_size)
-         == CL_SUCCESS);
-  char *dev_name = malloc(dev_name_size);
-  assert(clGetDeviceInfo(device, CL_DEVICE_NAME, dev_name_size, dev_name, NULL)
-         == CL_SUCCESS);
-
-  printf("Using OpenCL device: %s\n", dev_name);
-  printf("Use -d or -i to change this.\n");
-  free(dev_name);
-#endif
-
-  ctx->futcfg = futcfg;
-  ctx->fut = futctx;
 
   SDL_ASSERT(SDL_Init(SDL_INIT_EVERYTHING) == 0);
 }

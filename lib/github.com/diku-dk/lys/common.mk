@@ -12,8 +12,8 @@ $(PROGNAME):
 	@make # The sync might have resulted in a new Makefile.
 else
 include lib/github.com/diku-dk/lys/setup_flags.mk
-$(PROGNAME): $(PROGNAME)_wrapper.o $(PROGNAME)_printf.h lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/liblys.h lib/github.com/diku-dk/lys/main.c
-	gcc lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/main.c -I. -DPROGHEADER='"$(PROGNAME)_wrapper.h"' -DPRINTFHEADER='"$(PROGNAME)_printf.h"' $(PROGNAME)_wrapper.o -o $@ $(CFLAGS) $(LDFLAGS)
+$(PROGNAME): $(PROGNAME)_wrapper.o $(PROGNAME)_printf.h lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/liblys.h lib/github.com/diku-dk/lys/context_setup.c lib/github.com/diku-dk/lys/context_setup.h lib/github.com/diku-dk/lys/main.c
+	gcc lib/github.com/diku-dk/lys/liblys.c lib/github.com/diku-dk/lys/context_setup.c lib/github.com/diku-dk/lys/main.c -I. -DPROGHEADER='"$(PROGNAME)_wrapper.h"' -DPRINTFHEADER='"$(PROGNAME)_printf.h"' $(PROGNAME)_wrapper.o -o $@ $(CFLAGS) $(LDFLAGS)
 endif
 
 $(PROGNAME)_printf.h: $(PROGNAME)_wrapper.c
