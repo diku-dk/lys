@@ -1,8 +1,9 @@
 LYS_BACKEND?=opencl
 LYS_TTF?=0
 
-
+ifeq ($(origin PROG_FUT_DEPS), undefined)
 PROG_FUT_DEPS:=$(shell ls *.fut; find lib -name \*.fut)
+endif
 
 PKG_CFLAGS_PKGS=sdl2
 ifeq ($(LYS_TTF),1)
