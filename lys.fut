@@ -70,7 +70,7 @@ module lys: lys with text_content = text_content = {
       keyup key s
 
   let render (s: state) =
-    tabulate_2d (s.h) (s.w)
+    tabulate_2d s.h s.w
                 (\i j ->
                    let (i', j') = rotate_point (r32 (i-s.center.0)) (r32 (j-s.center.1)) s.time
                    let r = r32 s.radius
