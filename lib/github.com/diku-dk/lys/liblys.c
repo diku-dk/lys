@@ -140,7 +140,7 @@ static void sdl_loop(struct lys_context *ctx) {
 
   while (ctx->running) {
     int64_t now = lys_wall_time();
-    float delta = ((float)(now - ctx->last_time))/1000000;
+    float delta = ((float)(now - ctx->last_time))/1000000.0;
     ctx->fps = (ctx->fps*0.9 + (1/delta)*0.1);
     ctx->last_time = now;
     struct futhark_opaque_state *new_state;
@@ -158,7 +158,10 @@ static void sdl_loop(struct lys_context *ctx) {
 
     SDL_ASSERT(SDL_UpdateWindowSurface(ctx->wnd) == 0);
 
-    SDL_Delay((int) (1000.0 / ctx->max_fps - delta / 1000));
+    int delay =  1000.0/ctx->max_fps - delta*1000.0;
+    if (delay > 0) {
+      SDL_Delay(delay);
+    }
 
     handle_sdl_events(ctx);
   }
@@ -172,7 +175,10 @@ void lys_run_sdl(struct lys_context *ctx) {
   ctx->wnd =
     SDL_CreateWindow("Lys",
                      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                     ctx->width, ctx->height, ctx->sdl_flags);
+                     ctx->width, ctx->height,
+                     ctx->sdl_flags |
+                     SDL_RENDERER_ACCELERATED |
+                     SDL_RENDERER_PRESENTVSYNC);
   SDL_ASSERT(ctx->wnd != NULL);
 
   window_size_updated(ctx, ctx->width, ctx->height);
