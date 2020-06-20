@@ -104,7 +104,7 @@ void loop_iteration(struct lys_context *ctx, struct lys_text *text) {
   if (*(text->text_buffer) != '\0') {
     int32_t text_colour;
     FUT_CHECK(ctx->fut,
-              futhark_entry_text_colour(ctx->fut, (int32_t*) &text_colour,
+              futhark_entry_text_colour(ctx->fut, (uint32_t*) &text_colour,
                                         ctx->state));
     draw_text(ctx, text->font, text->font_size, text->text_buffer, text_colour, 10, 10);
   }
@@ -198,9 +198,9 @@ void do_bench(struct futhark_context *fut, int height, int width, int n, const c
       state = new_state;
     }
     if (do_render) {
-      struct futhark_i32_2d *out_arr;
+      struct futhark_u32_2d *out_arr;
       FUT_CHECK(fut, futhark_entry_render(fut, &out_arr, state));
-      FUT_CHECK(fut, futhark_free_i32_2d(fut, out_arr));
+      FUT_CHECK(fut, futhark_free_u32_2d(fut, out_arr));
     }
   }
   futhark_context_sync(fut);

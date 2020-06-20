@@ -136,7 +136,7 @@ static void handle_sdl_events(struct lys_context *ctx) {
 }
 
 static void sdl_loop(struct lys_context *ctx) {
-  struct futhark_i32_2d *out_arr;
+  struct futhark_u32_2d *out_arr;
 
   while (ctx->running) {
     int64_t now = lys_wall_time();
@@ -149,8 +149,8 @@ static void sdl_loop(struct lys_context *ctx) {
     ctx->state = new_state;
 
     FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state));
-    FUT_CHECK(ctx->fut, futhark_values_i32_2d(ctx->fut, out_arr, ctx->data));
-    FUT_CHECK(ctx->fut, futhark_free_i32_2d(ctx->fut, out_arr));
+    FUT_CHECK(ctx->fut, futhark_values_u32_2d(ctx->fut, out_arr, ctx->data));
+    FUT_CHECK(ctx->fut, futhark_free_u32_2d(ctx->fut, out_arr));
 
     SDL_ASSERT(SDL_BlitSurface(ctx->surface, NULL, ctx->wnd_surface, NULL)==0);
 
