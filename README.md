@@ -1,4 +1,4 @@
-# 2D graphics and interaction for Futhark [![Build Status](https://travis-ci.org/diku-dk/lys.svg?branch=master)](https://travis-ci.org/diku-dk/lys) [![Documentation](https://futhark-lang.org/pkgs/github.com/diku-dk/lys/status.svg)](https://futhark-lang.org/pkgs/github.com/diku-dk/lys/latest/)
+# 2D graphics and interaction for Futhark [![CI](https://github.com/diku-dk/lys/workflows/CI/badge.svg)](https://github.com/diku-dk/lys/actions) [![Documentation](https://futhark-lang.org/pkgs/github.com/diku-dk/lys/status.svg)](https://futhark-lang.org/pkgs/github.com/diku-dk/lys/latest/)
 
 Lys is a library and wrapper for pain-free graphics programming with
 [Futhark](https://futhark-lang.org).  It works by using `Makefile`
