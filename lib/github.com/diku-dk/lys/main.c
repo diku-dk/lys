@@ -294,15 +294,14 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  char font_path_rel[] = "/lib/github.com/diku-dk/lys/Inconsolata-Regular.ttf";
-  char* font_path = malloc(sizeof(char) * strlen(argv[0]) + sizeof(font_path_rel));
+  char* font_path = malloc(sizeof(char) * strlen(argv[0]) + sizeof(FONT_PATH_REL));
   assert(font_path != NULL);
   strcpy(font_path, argv[0]);
   char *last_dash = strrchr(font_path, '/');
   if (last_dash != NULL) {
     *last_dash = '\0';
   }
-  strcat(font_path, font_path_rel);
+  strcat(font_path, FONT_PATH_REL);
 
   int sdl_flags = 0;
   if (allow_resize) {
