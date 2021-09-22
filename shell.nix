@@ -9,5 +9,7 @@ mkShell {
     SDL2
     SDL2_ttf
     xxd
+    python3
+    gcc
   ];
 }
