@@ -8,5 +8,6 @@ mkShell {
     opencl-headers
     SDL2
     SDL2_ttf
+    xxd
   ];
 }
