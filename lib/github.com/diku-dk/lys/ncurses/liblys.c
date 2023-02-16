@@ -60,28 +60,33 @@ void render(int nrows, int ncols, const uint32_t *rgbs,
       uint32_t w1 = rgbs[(i*2+1)*ncols+j];
       fgs[i*ncols+j] = w0;
       bgs[i*ncols+j] = w1;
-      chars[i*ncols+j] = 127; // Sentinel;
+      chars[i*ncols+j] = 127; // Sentinel.
     }
   }
-  def();
 }
 
 void display(int nrows, int ncols,
              const uint32_t *fgs, const uint32_t *bgs, const char *chars) {
+  uint32_t prev_w0 = 0xdeadbeef;
+  uint32_t prev_w1 = 0xdeadbeef;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
       double r0 = 0, g0 = 0, b0 = 0;
       double r1 = 0, g1 = 0, b1 = 0;
       uint32_t w0 = fgs[i*ncols+j];
       uint32_t w1 = bgs[i*ncols+j];
-      r0 = (w0>>16)&0xFF;
-      g0 = (w0>>8)&0xFF;
-      b0 = (w0>>0)&0xFF;
-      r1 = (w1>>16)&0xFF;
-      g1 = (w1>>8)&0xFF;
-      b1 = (w1>>0)&0xFF;
-      fg_rgb(r0, g0, b0);
-      bg_rgb(r1, g1, b1);
+      if (w0 != prev_w0 || w1 != prev_w1) {
+        r0 = (w0>>16)&0xFF;
+        g0 = (w0>>8)&0xFF;
+        b0 = (w0>>0)&0xFF;
+        r1 = (w1>>16)&0xFF;
+        g1 = (w1>>8)&0xFF;
+        b1 = (w1>>0)&0xFF;
+        fg_rgb(r0, g0, b0);
+        bg_rgb(r1, g1, b1);
+        prev_w0 = w0;
+        prev_w1 = w1;
+      }
       char c = chars[i*ncols+j];
       if (c == 127) {
         fputs("▀", stdout);
