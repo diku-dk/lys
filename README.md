@@ -3,9 +3,10 @@
 Lys is a library and wrapper for pain-free graphics programming with
 [Futhark](https://futhark-lang.org).  It works by using `Makefile`
 rules to automatically generate a wrapper program in C that uses
-[SDL2](https://www.libsdl.org/) to display graphics and handle user
-events, whose behaviour is controlled by calling a Futhark program
-with specially defined entry points.
+[SDL2](https://www.libsdl.org/) or
+[ncurses](https://invisible-island.net/ncurses) to display graphics
+and handle user events, whose behaviour is controlled by calling a
+Futhark program with specially defined entry points.
 
 ## Trying the Demo (assuming that you have git-cloned this repository)
 
@@ -94,18 +95,36 @@ These keybindings are common for all lys programs:
 
 Run `./lys --help` to see the available options.
 
-## Using the CUDA backend
+## Configuring the backend
 
 By default, the build rules defined in
 `lib/github.com/diku-dk/lys/common.mk` use Futhark's OpenCL backend.
-You can change it to use Futhark's CUDA backend by setting
-`LYS_BACKEND=cuda`, either in the Makefile or as an environment
+You can change it by setting `LYS_BACKEND` to either `cuda`,
+`multicore`, or `c`, either in the Makefile or as an environment
 variable.
 
-## Using the sequential backend
+## Configuring the frontend
 
-Set `LYS_BACKEND=c`.  Be aware that this is strictly single-threaded C
-with few optimisations.  It might be quite slow.
+By default, Lys uses SDL to display graphics and read input.  There is
+also support for using the terminal to render graphics.  This can be
+enabled by setting `LYS_FRONTEND=ncurses` before (re-)compiling.  The
+following caveats apply:
+
+* Lys expects a terminal capable of 24-bit colours.
+
+* Terminals "pixels" are rectangular, but not square.  Lys tries to
+  implement square pixels through Unicode box characters and separate
+  foreground/background colours.  How well this works depends on your
+  terminal and its font settings.
+
+* Terminals are relatively slow.  You can increase the resolution by
+  using a small font, but it will be much slower than SDL.
+
+* Terminals do not support fine-grained input events, e.g. separate
+  key up/down events.  Lys tries its best to simulate these.
+
+Some Lys programs might work fine using the ncurses backend, but
+others may not work so well.
 
 ## Examples of programs using Lys
 
