@@ -184,6 +184,10 @@ void check_input(struct lys_context *ctx) {
         keydown(ctx, 0x61 + (c-'a'));
         return;
       }
+      if (c >= '0' && c <= '9') {
+        keydown(ctx, 0x30 + (c-'0'));
+        return;
+      }
     }
   }
 }
