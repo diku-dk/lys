@@ -127,6 +127,7 @@ void check_input(struct lys_context *ctx) {
     resize(ctx);
     break;
   case KEY_F0+1:
+    ctx->event_handler(ctx, LYS_F1);
     keydown(ctx, 0x4000003A);
     return;
   case KEY_F0+2:

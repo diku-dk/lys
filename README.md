@@ -88,7 +88,7 @@ On Windows... well, if you know how, please tell us!
 
 These keybindings are common for all lys programs:
 
-  + ESC: Exit the program, or escape mouse grabbing.
+  + ESC (or Ctrl-c with ncurses): Exit the program, or escape mouse grabbing.
   + F1: Toggle showing text.
 
 ## Common command-line options
