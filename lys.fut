@@ -7,7 +7,7 @@ def rotate_point (x: f32) (y: f32) (angle: f32) =
   let ynew = x * s + y * c
   in (xnew, ynew)
 
-type text_content = (i64, i64, i64, i64, i64)
+type text_content = (i64, i64, i64, i64, i64, i64, i64)
 module lys: lys with text_content = text_content = {
   type state = {time: f32, h: i64, w: i64,
                 center: (i64, i64),
@@ -83,13 +83,13 @@ module lys: lys with text_content = text_content = {
   type text_content = text_content
 
   def text_format () =
-    "FPS: %ld\nCenter: (%ld, %ld)\nCenter object: %[circle|square]\nRadius: %ld"
+    "FPS: %ld\nCenter: (%ld, %ld)\nCenter object: %[circle|square]\nRadius: %ld\nSize: (%ld,%ld)"
 
   def text_content (render_duration: f32) (s: state): text_content =
     let center_object_id = match s.center_object
                            case #circle -> 0
                            case #square -> 1
-    in (i64.f32 render_duration, s.center.0, s.center.1, center_object_id, s.radius)
+    in (i64.f32 render_duration, s.center.0, s.center.1, center_object_id, s.radius, s.w, s.h)
 
   def text_colour = const argb.yellow
 }

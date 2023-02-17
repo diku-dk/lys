@@ -1,36 +1,13 @@
+// We use ncurses for the input handling, but not for output.  I am
+// not sure ncurses supports 24 bit colours.
+
 #include "liblys.h"
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <string.h>
+#include <ncursesw/curses.h>
 
 struct termios orig_termios;
-
-void cooked_mode() {
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
-  printf("\033[?25h");
-}
-
-void raw_mode() {
-  printf("\033[?25l");
-
-  tcgetattr(STDIN_FILENO, &orig_termios);
-  atexit(cooked_mode);
-
-  struct termios raw = orig_termios;
-  raw.c_iflag &= ~(IXON);
-  raw.c_lflag &= ~(ECHO | ICANON | ISIG);
-  raw.c_cc[VMIN] = 0;
-  raw.c_cc[VTIME] = 0;
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-}
-
-void clear_screen() {
-  printf("\033[2");
-}
-
-void clear_line() {
-  printf("\033[2K");
-}
 
 void def() {
   printf("\033[0m");
@@ -42,14 +19,6 @@ void fg_rgb(uint8_t r, uint8_t g, uint8_t b) {
 
 void bg_rgb(uint8_t r, uint8_t g, uint8_t b) {
   printf("\033[48;2;%d;%d;%dm", r, g, b);
-}
-
-void cursor_home() {
-  printf("\033[;H");
-}
-
-void cursor_goto(int x, int y) {
-  printf("\033[%d;%dH", y, x);
 }
 
 void render(int nrows, int ncols, const uint32_t *rgbs,
@@ -113,7 +82,23 @@ void keyup(struct lys_context *ctx, int keysym) {
   ctx->state = new_state;
 }
 
-// Best-effort at translating VT100 key codes to SDL.
+void resize(struct lys_context *ctx) {
+  int nrows, ncols;
+  getmaxyx(stdscr, nrows, ncols);
+  ctx->width = ncols;
+  ctx->height = nrows*2;
+  ctx->fgs = realloc(ctx->fgs, nrows*ncols*sizeof(uint32_t));
+  ctx->bgs = realloc(ctx->bgs, nrows*ncols*sizeof(uint32_t));
+  ctx->chars = realloc(ctx->chars, nrows*ncols*sizeof(char));
+  ctx->rgbs = realloc(ctx->rgbs, ctx->width*ctx->height*sizeof(uint32_t));
+
+  struct futhark_opaque_state *new_state;
+  FUT_CHECK(ctx->fut, futhark_entry_resize(ctx->fut, &new_state, ctx->height, ctx->width, ctx->state));
+  futhark_free_opaque_state(ctx->fut, ctx->state);
+  ctx->state = new_state;
+}
+
+// Best-effort at translating ncurses key codes to SDL.
 //
 // The handling of keydown/keyup events is complicated by the fact
 // that the terminal does not report keyup events.  As a workaround,
@@ -126,68 +111,49 @@ void check_input(struct lys_context *ctx) {
     ctx->key_pressed = 0;
   }
 
-  char c;
-  if (read(STDIN_FILENO, &c, 1) != 0) {
-    switch (c) {
-    case 3: // Ctrl-c
-      ctx->running = 0;
+  int c;
+  if ((c = getch()) == ERR) {
+    return;
+  }
+  switch (c) {
+  case 3: // Ctrl-c
+    ctx->running = 0;
+    break;
+  case KEY_RESIZE:
+    resize(ctx);
+    break;
+  case KEY_F0+1:
+    keydown(ctx, 0x4000003A);
+    return;
+  case KEY_F0+2:
+    keydown(ctx, 0x4000003B);
+    return;
+  case KEY_F0+3:
+    keydown(ctx, 0x4000003C);
+    return;
+  case KEY_F0+4:
+    keydown(ctx, 0x4000003D);
+    return;
+  case KEY_UP:
+    keydown(ctx, 0x40000052);
+    return;
+  case KEY_DOWN:
+    keydown(ctx, 0x40000051);
+    return;
+  case KEY_RIGHT:
+    keydown(ctx, 0x4000004F);
+    return;
+  case KEY_LEFT:
+    keydown(ctx, 0x40000050);
+    return;
+  default:
+    if (c >= 'a' && c <= 'z') {
+      keydown(ctx, 0x61 + (c-'a'));
       return;
-    case 0x1b: // Escape
-      if (read(STDIN_FILENO, &c, 1) != 0) {
-        switch (c) {
-        case 0x1b: // Double escape!
-          ctx->running = 0;
-          return;
-        case 'O': // Application key
-          if (read(STDIN_FILENO, &c, 1) != 0) {
-            switch (c) {
-            case 'P':
-              keydown(ctx, 0x4000003A);
-              return;
-            case 'Q':
-              keydown(ctx, 0x4000003B);
-              return;
-            case 'R':
-              keydown(ctx, 0x4000003C);
-              return;
-            case 'S':
-              keydown(ctx, 0x4000003D);
-              return;
-            }
-          }
-          return;
-        }
-      }
-      if (read(STDIN_FILENO, &c, 1) != 0) {
-        switch (c) {
-        case 'A':
-          // Arrow up
-          keydown(ctx, 0x40000052);
-          return;
-        case 'B':
-          // Arrow down
-          keydown(ctx, 0x40000051);
-          return;
-        case 'C':
-          // Arrow right
-          keydown(ctx, 0x4000004F);
-          return;
-        case 'D':
-          // Arrow left
-          keydown(ctx, 0x40000050);
-          return;
-        }
-      }
+    }
+    if (c >= '0' && c <= '9') {
+      keydown(ctx, 0x30 + (c-'0'));
       return;
-    default:
-      if (c >= 'a' && c <= 'z') {
-        keydown(ctx, 0x61 + (c-'a'));
-        return;
-      }
-      if (c >= '0' && c <= '9') {
-        keydown(ctx, 0x30 + (c-'0'));
-        return;
-      }
     }
   }
 }
@@ -196,10 +162,7 @@ void lys_run_ncurses(struct lys_context *ctx) {
   ctx->running = 1;
   ctx->last_time = lys_wall_time();
 
-  int nrows = ctx->height/2;
-  int ncols = ctx->width;
-
-  uint32_t *rgbs = calloc((nrows*2)*ncols, sizeof(uint32_t));
+  resize(ctx);
 
   ctx->event_handler(ctx, LYS_LOOP_START);
 
@@ -214,15 +177,19 @@ void lys_run_ncurses(struct lys_context *ctx) {
 
     struct futhark_u32_2d *out_arr;
     FUT_CHECK(ctx->fut, futhark_entry_render(ctx->fut, &out_arr, ctx->state));
-    FUT_CHECK(ctx->fut, futhark_values_u32_2d(ctx->fut, out_arr, rgbs));
+    FUT_CHECK(ctx->fut, futhark_values_u32_2d(ctx->fut, out_arr, ctx->rgbs));
     FUT_CHECK(ctx->fut, futhark_context_sync(ctx->fut));
     FUT_CHECK(ctx->fut, futhark_free_u32_2d(ctx->fut, out_arr));
     FUT_CHECK(ctx->fut, futhark_free_opaque_state(ctx->fut, old_state));
 
-    render(nrows, ncols, rgbs, ctx->fgs, ctx->bgs, ctx->chars);
-    ctx->event_handler(ctx, LYS_LOOP_ITERATION);
-    display(nrows, ncols, ctx->fgs, ctx->bgs, ctx->chars);
-    fflush(stdout);
+    {
+      int nrows = ctx->height/2;
+      int ncols = ctx->width;
+      render(nrows, ncols, ctx->rgbs, ctx->fgs, ctx->bgs, ctx->chars);
+      ctx->event_handler(ctx, LYS_LOOP_ITERATION);
+      display(nrows, ncols, ctx->fgs, ctx->bgs, ctx->chars);
+      fflush(stdout);
+    }
 
     check_input(ctx);
 
@@ -232,34 +199,47 @@ void lys_run_ncurses(struct lys_context *ctx) {
     }
 
     def();
-    cursor_home();
+    move(0,0);
   }
 
   ctx->event_handler(ctx, LYS_LOOP_END);
 
-  free(rgbs);
+  // Ncurses cleanup.
+  clrtobot();
+  endwin();
+
+  // Our cleanup.
+  free(ctx->rgbs);
   free(ctx->fgs);
   free(ctx->bgs);
   free(ctx->chars);
-
   FUT_CHECK(ctx->fut, futhark_free_opaque_state(ctx->fut, ctx->state));
 }
 
 void lys_setup(struct lys_context *ctx, int max_fps) {
+  // ncurses initialisation.
+  initscr(); // Initialise ncurses.
+  raw(); // Disable line buffering.
+  nodelay(stdscr, TRUE);  // Non-blocking getch().
+  keypad(stdscr, TRUE); // F keys, arrow keys, etc.
+  noecho(); // Admit nothing.
+  intrflush(stdscr, TRUE); // Interrupts take precedence.
+  curs_set(0); // Hide cursor.
+
   memset(ctx, 0, sizeof(struct lys_context));
 
-  struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  int nrows, ncols;
+  getmaxyx(stdscr, nrows, ncols);
 
-  ctx->width = w.ws_col;
-  ctx->height = w.ws_row*2;
+  ctx->width = ncols;
+  ctx->height = nrows*2;
   ctx->fps = 0;
   ctx->max_fps = max_fps;
-  ctx->fgs = malloc(ctx->width * ctx->height * sizeof(uint32_t));
-  ctx->bgs = malloc(ctx->width * ctx->height * sizeof(uint32_t));
-  ctx->chars = malloc(ctx->width * ctx->height * sizeof(char));
+  ctx->fgs = NULL;
+  ctx->bgs = NULL;
+  ctx->chars = NULL;
+  ctx->rgbs = NULL;
   ctx->key_pressed = 0;
-  raw_mode();
 }
 
 void draw_text(struct lys_context *ctx, char* buffer, int32_t colour,

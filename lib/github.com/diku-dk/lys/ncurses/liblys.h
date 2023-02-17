@@ -27,6 +27,7 @@ struct lys_context {
   uint32_t *fgs;
   uint32_t *bgs;
   char *chars;
+  uint32_t *rgbs;
   int64_t last_time;
   bool running;
   bool grab_mouse;
