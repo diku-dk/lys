@@ -26,6 +26,7 @@ static inline void _fut_check(struct futhark_context *ctx, int res,
   }
 }
 
+#ifdef LYS_TEXT
 struct lys_text {
   char* text_format;
   char* text_buffer;
@@ -35,5 +36,6 @@ struct lys_text {
 };
 
 void prepare_text(struct futhark_context* futctx, struct lys_text *text);
+#endif
 
 #endif

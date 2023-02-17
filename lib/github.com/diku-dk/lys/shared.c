@@ -50,6 +50,7 @@ int64_t lys_wall_time() {
   return time.tv_sec * 1000000 + time.tv_usec;
 }
 
+#ifdef LYS_TEXT
 size_t n_printf_arguments();
 
 void prepare_text(struct futhark_context* futctx, struct lys_text *text) {
@@ -127,3 +128,4 @@ void prepare_text(struct futhark_context* futctx, struct lys_text *text) {
 
   text->show_text = true;
 }
+#endif
