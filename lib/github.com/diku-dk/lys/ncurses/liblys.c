@@ -258,7 +258,7 @@ void draw_text(struct lys_context *ctx, char* buffer, int32_t colour,
     } else {
       if (x < ctx->width && y < ctx->height) {
         ctx->fgs[y*ctx->width+x] = colour;
-        ctx->bgs[y*ctx->width+x] = 0;
+        ctx->bgs[y*ctx->width+x] = ~colour;
         ctx->chars[y*ctx->width+x] = buffer[i];
       }
       x++;
