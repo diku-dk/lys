@@ -40,7 +40,7 @@ else
 DEVICE_LDFLAGS=-lOpenCL
 endif
 else ifeq ($(LYS_BACKEND),cuda)
-DEVICE_LDFLAGS=-lcuda -lnvrtc
+DEVICE_LDFLAGS=-lcuda -lnvrtc -lcudart
 else ifeq ($(LYS_BACKEND),hip)
 DEVICE_LDFLAGS=-lamdhip64 -lhiprtc
 else ifeq ($(LYS_BACKEND),c)
