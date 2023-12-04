@@ -154,7 +154,8 @@ int main(int argc, char** argv) {
   lys_setup(&ctx, max_fps, num_frames, output, width, height);
 
   char* opencl_device_name = NULL;
-  lys_setup_futhark_context(deviceopt, device_interactive,
+  lys_setup_futhark_context(argv[0],
+                            deviceopt, device_interactive,
                             &futcfg, &ctx.fut, &opencl_device_name);
   if (opencl_device_name != NULL) {
     free(opencl_device_name);

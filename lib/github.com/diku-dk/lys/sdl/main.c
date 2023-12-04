@@ -226,7 +226,8 @@ int main(int argc, char** argv) {
   lys_setup(&ctx, width, height, max_fps, sdl_flags);
 
   char* opencl_device_name = NULL;
-  lys_setup_futhark_context(deviceopt, device_interactive,
+  lys_setup_futhark_context(argv[0],
+                            deviceopt, device_interactive,
                             &futcfg, &ctx.fut, &opencl_device_name);
   if (opencl_device_name != NULL) {
     printf("Using OpenCL device: %s\n", opencl_device_name);
