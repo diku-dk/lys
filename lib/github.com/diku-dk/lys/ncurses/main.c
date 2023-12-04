@@ -70,6 +70,7 @@ void usage(char **argv) {
   printf("Usage: %s options...\n", argv[0]);
   puts("Options:");
   puts("  -?      Print this help and exit.");
+  puts("  -R      Does nothing.");
   puts("  -d DEV  Set the computation device.");
   puts("  -r INT  Maximum frames per second.");
   puts("  -f INT  Frames rendered.");
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
   int num_frames = -1;
 
   int c;
-  while ( (c = getopt(argc, argv, "r:d:in:f:")) != -1) {
+  while ( (c = getopt(argc, argv, "r:Rd:in:f:")) != -1) {
     switch (c) {
     case 'r':
       max_fps = atoi(optarg);
@@ -119,6 +120,9 @@ int main(int argc, char** argv) {
     case '?':
       usage(argv);
       return EXIT_SUCCESS;
+    case 'R':
+      // This is for compatibility with the SDL frontend.
+      break;
     default:
       fprintf(stderr, "unknown option: %c\n", c);
       usage(argv);
