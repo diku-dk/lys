@@ -6,8 +6,11 @@
 #include <string.h>
 #include <errno.h>
 
+bool show_text = true;
+
 void loop_start(struct lys_context *ctx, struct lys_text *text) {
   prepare_text(ctx->fut, text);
+  text->show_text = show_text;
 }
 
 void loop_iteration(struct lys_context *ctx, struct lys_text *text) {
@@ -74,6 +77,7 @@ void usage(char **argv) {
   puts("  -d DEV  Set the computation device.");
   puts("  -r INT  Maximum frames per second.");
   puts("  -f INT  Frames rendered.");
+  puts("  -t      Do not show text by default.");
   puts("  -i      Select execution device interactively.");
   puts("  -n FILE Render frames to FILE.");
 }
@@ -88,7 +92,7 @@ int main(int argc, char** argv) {
   int num_frames = -1;
 
   int c;
-  while ( (c = getopt(argc, argv, "r:Rd:in:f:")) != -1) {
+  while ( (c = getopt(argc, argv, "r:Rtd:in:f:")) != -1) {
     switch (c) {
     case 'r':
       max_fps = atoi(optarg);
@@ -103,6 +107,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "'%s' is not a number of frames.\n", optarg);
         exit(EXIT_FAILURE);
       }
+      break;
+    case 't':
+      show_text = false;
       break;
     case 'd':
       deviceopt = optarg;
