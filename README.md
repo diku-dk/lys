@@ -1,12 +1,11 @@
 # 2D graphics and interaction for Futhark [![CI](https://github.com/diku-dk/lys/workflows/CI/badge.svg)](https://github.com/diku-dk/lys/actions) [![Documentation](https://futhark-lang.org/pkgs/github.com/diku-dk/lys/status.svg)](https://futhark-lang.org/pkgs/github.com/diku-dk/lys/latest/)
 
 Lys is a library and wrapper for pain-free graphics programming with
-[Futhark](https://futhark-lang.org).  It works by using `Makefile`
+[Futhark](https://futhark-lang.org). It works by using `Makefile`
 rules to automatically generate a wrapper program in C that uses
-[SDL2](https://www.libsdl.org/) or
-[ncurses](https://invisible-island.net/ncurses) to display graphics
-and handle user events, whose behaviour is controlled by calling a
-Futhark program with specially defined entry points.
+[SDL2](https://www.libsdl.org/) or the console to display graphics and
+handle user events, whose behaviour is controlled by calling a Futhark
+program with specially defined entry points.
 
 ## Trying the Demo (assuming that you have git-cloned this repository)
 

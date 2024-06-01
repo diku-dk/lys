@@ -19,17 +19,16 @@ ifeq ($(LYS_TTF),1)
 PKG_CFLAGS_PKGS+= SDL2_ttf
 endif
 
+PKG_CFLAGS=$(shell pkg-config --cflags $(PKG_CFLAGS_PKGS))
+PKG_LDFLAGS=$(shell pkg-config --libs $(PKG_CFLAGS_PKGS))
+
 else ifeq ($(LYS_FRONTEND),console)
-PKG_CFLAGS_PKGS=ncurses
 
 else
 $(error Unknown LYS_FRONTEND: $(LYS_FRONTEND).  Must be 'sdl' or 'console')
 endif
 
-PKG_CFLAGS=$(shell pkg-config --cflags $(PKG_CFLAGS_PKGS))
-PKG_LDFLAGS=$(shell pkg-config --libs $(PKG_CFLAGS_PKGS))
-
-NOWARN_CFLAGS=-std=c11 -O
+NOWARN_CFLAGS=-std=gnu11 -O
 
 CFLAGS?=$(NOWARN_CFLAGS) $(PKG_CFLAGS) -Wall -Wextra -pedantic
 
