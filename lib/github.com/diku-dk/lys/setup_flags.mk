@@ -8,17 +8,22 @@ ifeq ($(origin PROG_FUT_DEPS), undefined)
 PROG_FUT_DEPS:=$(shell ls *.fut; find $(SELF_DIR)/../../.. -name \*.fut)
 endif
 
+# For compatibility.
+ifeq ($(LYS_FRONTEND),ncurses)
+LYS_FRONTEND=console
+endif
+
 ifeq ($(LYS_FRONTEND),sdl)
 PKG_CFLAGS_PKGS=sdl2
 ifeq ($(LYS_TTF),1)
 PKG_CFLAGS_PKGS+= SDL2_ttf
 endif
 
-else ifeq ($(LYS_FRONTEND),ncurses)
+else ifeq ($(LYS_FRONTEND),console)
 PKG_CFLAGS_PKGS=ncurses
 
 else
-$(error Unknown LYS_FRONTEND: $(LYS_FRONTEND).  Must be 'sdl' or 'ncurses')
+$(error Unknown LYS_FRONTEND: $(LYS_FRONTEND).  Must be 'sdl' or 'console')
 endif
 
 PKG_CFLAGS=$(shell pkg-config --cflags $(PKG_CFLAGS_PKGS))

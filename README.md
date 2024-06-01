@@ -88,7 +88,7 @@ On Windows... well, if you know how, please tell us!
 
 These keybindings are common for all lys programs:
 
-  + ESC (or Ctrl-c with ncurses): Exit the program, or escape mouse grabbing.
+  + ESC (or Ctrl-c with console): Exit the program, or escape mouse grabbing.
   + F1: Toggle showing text.
 
 ## Common command-line options
@@ -107,7 +107,7 @@ variable.
 
 By default, Lys uses SDL to display graphics and read input.  There is
 also support for using the terminal to render graphics.  This can be
-enabled by setting `LYS_FRONTEND=ncurses` before (re-)compiling.  The
+enabled by setting `LYS_FRONTEND=console` before (re-)compiling.  The
 following caveats apply:
 
 * Lys expects a terminal capable of 24-bit colours.
@@ -123,7 +123,7 @@ following caveats apply:
 * Terminals do not support fine-grained input events, e.g. separate
   key up/down events.  Lys tries its best to simulate these.
 
-Some Lys programs might work fine using the ncurses backend, but
+Some Lys programs might work fine using the console frontend, but
 others may not work so well.
 
 ## Examples of programs using Lys
