@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
 
   int32_t seed = (int32_t) lys_wall_time();
   futhark_entry_init(ctx.fut, &ctx.state, seed, ctx.height, ctx.width);
-  lys_run_ncurses(&ctx);
+  lys_run_console(&ctx);
 
   futhark_context_free(ctx.fut);
   futhark_context_config_free(futcfg);

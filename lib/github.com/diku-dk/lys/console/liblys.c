@@ -166,7 +166,7 @@ void check_input(struct lys_context *ctx) {
   }
 }
 
-void lys_run_ncurses(struct lys_context *ctx) {
+void lys_run_console(struct lys_context *ctx) {
   ctx->running = 1;
   ctx->last_time = lys_wall_time();
 
