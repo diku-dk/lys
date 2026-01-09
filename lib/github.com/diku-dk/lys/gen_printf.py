@@ -10,7 +10,7 @@ with open(in_file) as f:
 
 start = contents.find('futhark_entry_text_content')
 end = contents.find(')', start)
-types = re.findall('([^ ]+) \*out\d+,', contents[start:end])
+types = re.findall(r'([^ ]+) \*out\d+,', contents[start:end])
 out_vars = ['out{}'.format(i) for i in range(len(types))]
 
 with open(out_file, 'w') as f:
