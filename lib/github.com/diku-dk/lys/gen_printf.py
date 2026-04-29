@@ -9,7 +9,7 @@ self_dir, out_file, in_file = sys.argv[1:]
 with open(in_file) as f:
     manifest = json.load(f)
 
-contents_type = manifest['entry_points']['text_content']['outputs'][0]['type']
+contents_type = manifest['entry_points']['text_content']['output']['type']
 
 C_TYPE_MAPPING = { 'u8': 'uint8_t',
                    'u16': 'uint16_t',
