@@ -60,7 +60,7 @@ with open(out_file, 'w') as f:
     if len(types) == 1:
         print(f'  union {{ {contents_ctype} val; char* sum_name; }} contents;', file=f)
         print('  FUT_CHECK(ctx->fut, futhark_entry_text_content(ctx->fut, &contents.val, render_milliseconds, ctx->state));', file=f)
-        print('  snprintf(dest, dest_len, format, {});'.format(('contents' + ('.sum_name' if contents_ctype == 'i32' else '.val'))), file=f)
+        print('  snprintf(dest, dest_len, format, {});'.format(('contents' + ('.sum_name' if contents_ctype == 'int32_t' else '.val'))), file=f)
     elif len(types) > 0:
         print('  {} contents;'.format(contents_ctype), file=f)
         print('  FUT_CHECK(ctx->fut, futhark_entry_text_content(ctx->fut, &contents, render_milliseconds, ctx->state));', file=f)
@@ -72,7 +72,7 @@ with open(out_file, 'w') as f:
             print('  if (sum_names[{}] != NULL) {{'.format(i), file=f)
             print('    {v}.sum_name = sum_names[{i}][(int32_t) {v}.val];'.format(v=v, i=i), file=f)
             print('  }', file=f)
-        print('  snprintf(dest, dest_len, format, {});'.format(', '.join((s + ('.sum_name' if t == 'i32' else '.val')) for s, t in zip(out_vars, types))), file=f)
+        print('  snprintf(dest, dest_len, format, {});'.format(', '.join((s + ('.sum_name' if t == 'int32_t' else '.val')) for s, t in zip(out_vars, types))), file=f)
     else:
         for x in ['ctx', 'render_milliseconds', 'sum_names']:
             print('UNUSED({});'.format(x), file=f)
